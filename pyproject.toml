@@ -1,0 +1,47 @@
+[project]
+name = "chatbot-app"
+version = "1.0.0"
+description = "Local agentic AI workspace powered by Streamlit, Ollama and ChromaDB"
+readme = "README.md"
+requires-python = ">=3.11"
+
+dependencies = [
+    "streamlit",
+    "ollama",
+    "python-dotenv",
+    "pydantic",
+    "pydantic-settings",
+    "tenacity",
+    "orjson",
+    "pypdf",
+    "python-docx",
+    "openpyxl",
+    "python-pptx",
+    "pandas",
+    "pillow",
+    "chromadb",
+    "ddgs",
+    "pytest",
+]
+
+[project.scripts]
+techcorp-doctor = "scripts.doctor:main"
+
+[tool.pytest.ini_options]
+testpaths = [
+    "tests",
+]
+python_files = [
+    "test_*.py",
+]
+addopts = [
+    "-ra",
+    "--strict-markers",
+    "--strict-config",
+]
+filterwarnings = [
+    "ignore::DeprecationWarning",
+]
+
+[tool.uv]
+package = false

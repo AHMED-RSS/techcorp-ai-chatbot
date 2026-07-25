@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "slug": "study_coach",
+  "name": "Study Coach",
+  "description": "Turns local material into explanations, revision notes, flashcards and practice questions.",
+  "icon": "🎓",
+  "keywords": [
+    "study",
+    "learn",
+    "quiz",
+    "flashcard",
+    "revision",
+    "exam",
+    "summary",
+    "notes"
+  ],
+  "built_in": true,
+  "enabled": true,
+  "created_at": "2026-07-25T14:02:19+00:00",
+  "updated_at": "2026-07-25T21:34:50+00:00"
+}
