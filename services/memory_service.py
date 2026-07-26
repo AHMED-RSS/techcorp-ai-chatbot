@@ -728,6 +728,39 @@ class MemoryService:
 
         return True
 
+    def clear_task_states(
+        self,
+        *,
+        chat_id: str | None = None,
+    ) -> int:
+        """
+        Permanently delete task snapshots.
+
+        When chat_id is supplied, only snapshots belonging
+        to that conversation are deleted.
+        """
+
+        deleted = 0
+
+        states = self.list_task_states(
+            chat_id=chat_id,
+            limit=100_000,
+        )
+
+        for state in states:
+            if (
+                chat_id is not None
+                and state.chat_id != chat_id
+            ):
+                continue
+
+            if self.delete_task_state(
+                state.id
+            ):
+                deleted += 1
+
+        return deleted
+
     # ========================================================
     # PATHS AND STORAGE
     # ========================================================

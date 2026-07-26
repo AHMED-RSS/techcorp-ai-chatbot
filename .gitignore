@@ -61,4 +61,11 @@ desktop.ini
 *.tar
 *.tar.gz
 
-.agents/
+# Local secrets
+
+# Local backup files
+*.before-*
+*.vision-working
+
+# Python cache
+*.pyc

@@ -22,6 +22,7 @@ class ComposerAttachment:
     mime_type: str
     document_id: str | None = None
     title: str | None = None
+    stored_path: str | None = None
     indexed_chunks: int = 0
     error: str | None = None
 
@@ -67,6 +68,16 @@ class ComposerAttachment:
                 or None
             )
 
+        if self.stored_path is not None:
+            cleaned_stored_path = str(
+                self.stored_path
+            ).strip()
+
+            self.stored_path = (
+                cleaned_stored_path
+                or None
+            )
+
         try:
             self.indexed_chunks = max(
                 0,
@@ -93,6 +104,7 @@ class ComposerAttachment:
             "mime_type": self.mime_type,
             "document_id": self.document_id,
             "title": self.title,
+            "stored_path": self.stored_path,
             "indexed_chunks": self.indexed_chunks,
             "error": self.error,
         }

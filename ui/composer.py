@@ -227,6 +227,16 @@ def process_composer_attachments(
                 or attachment.name
             )
 
+            attachment.stored_path = (
+                str(
+                    document.get(
+                        "stored_path",
+                        "",
+                    )
+                ).strip()
+                or None
+            )
+
             if document_id:
                 indexed_result = (
                     rag_service.index_document(

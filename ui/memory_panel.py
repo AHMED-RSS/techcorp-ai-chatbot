@@ -198,25 +198,102 @@ def render_memory_item(
 
 
 def render_task_state(
+    memory_service: MemoryService,
     state: TaskState,
 ) -> None:
     icon = TASK_STATUS_ICONS.get(
         state.status,
-        "○",
+        "?",
     )
 
-    with st.container(
-        border=True
-    ):
-        st.markdown(
-            f"**{icon} "
-            f"{state.goal or state.user_request}**"
+    title = (
+        state.goal
+        or state.user_request
+        or "Untitled task"
+    )
+
+    with st.container(border=True):
+        columns = st.columns(
+            [5, 1],
+            gap="small",
         )
 
-        st.caption(
-            f"Status: {state.status.title()} · "
-            f"Updated: {state.updated_at}"
+        with columns[0]:
+            st.markdown(
+                f"**{icon} {title}**"
+            )
+
+            st.caption(
+                f"Status: {state.status.title()} ? "
+                f"Updated: {state.updated_at}"
+            )
+
+        with columns[1]:
+            if st.button(
+                "Delete",
+                key=f"delete_task_{state.id}",
+                use_container_width=True,
+            ):
+                st.session_state[
+                    "confirm_delete_task_state_id"
+                ] = state.id
+
+                st.rerun()
+
+        pending_id = st.session_state.get(
+            "confirm_delete_task_state_id"
         )
+
+        if pending_id == state.id:
+            st.warning(
+                "Delete this task snapshot permanently?"
+            )
+
+            confirm_columns = st.columns(
+                2,
+                gap="small",
+            )
+
+            with confirm_columns[0]:
+                if st.button(
+                    "Confirm delete",
+                    key=f"confirm_task_{state.id}",
+                    type="primary",
+                    use_container_width=True,
+                ):
+                    try:
+                        deleted = (
+                            memory_service
+                            .delete_task_state(
+                                state.id
+                            )
+                        )
+
+                        st.session_state[
+                            "confirm_delete_task_state_id"
+                        ] = None
+
+                        if deleted:
+                            st.toast(
+                                "Task snapshot deleted"
+                            )
+
+                        st.rerun()
+
+                    except MemoryServiceError as exc:
+                        st.error(str(exc))
+
+            with confirm_columns[1]:
+                if st.button(
+                    "Cancel",
+                    key=f"cancel_task_{state.id}",
+                    use_container_width=True,
+                ):
+                    st.session_state[
+                        "confirm_delete_task_state_id"
+                    ] = None
+
+                    st.rerun()
 
         if state.final_output:
             with st.expander(
@@ -234,6 +311,7 @@ def render_task_state(
             st.json(
                 state.to_dict()
             )
+
 
 
 def render_memory_sidebar(
@@ -535,18 +613,32 @@ def render_memory_workspace(
             key="task_state_current_chat_only",
         )
 
-        states = (
-            memory_service
-            .list_task_states(
-                chat_id=(
-                    st.session_state
-                    .current_chat_id
-                    if current_chat_only
-                    else None
-                ),
-                limit=200,
-            )
+        current_chat_id = (
+            st.session_state.current_chat_id
         )
+
+        if (
+            current_chat_only
+            and not current_chat_id
+        ):
+            states: list[TaskState] = []
+
+            st.info(
+                "No current chat is selected."
+            )
+
+        else:
+            states = (
+                memory_service
+                .list_task_states(
+                    chat_id=(
+                        current_chat_id
+                        if current_chat_only
+                        else None
+                    ),
+                    limit=200,
+                )
+            )
 
         st.metric(
             "Task snapshots",
@@ -560,8 +652,105 @@ def render_memory_workspace(
 
         for state in states:
             render_task_state(
-                state
+                memory_service,
+                state,
             )
+
+        st.divider()
+
+        scope = (
+            "chat"
+            if current_chat_only
+            else "all"
+        )
+
+        delete_label = (
+            "Delete current chat snapshots"
+            if current_chat_only
+            else "Delete all task snapshots"
+        )
+
+        if st.button(
+            delete_label,
+            key=f"delete_tasks_{scope}",
+            use_container_width=True,
+            disabled=not states,
+        ):
+            st.session_state[
+                "confirm_delete_task_scope"
+            ] = scope
+
+            st.rerun()
+
+        confirmation_scope = (
+            st.session_state.get(
+                "confirm_delete_task_scope"
+            )
+        )
+
+        if confirmation_scope == scope:
+            if scope == "chat":
+                warning_text = (
+                    "Delete every task snapshot "
+                    "for this chat permanently?"
+                )
+            else:
+                warning_text = (
+                    "Delete every stored task "
+                    "snapshot permanently?"
+                )
+
+            st.warning(warning_text)
+
+            bulk_columns = st.columns(
+                2,
+                gap="small",
+            )
+
+            with bulk_columns[0]:
+                if st.button(
+                    "Confirm delete",
+                    key=f"confirm_tasks_{scope}",
+                    type="primary",
+                    use_container_width=True,
+                ):
+                    try:
+                        deleted = (
+                            memory_service
+                            .clear_task_states(
+                                chat_id=(
+                                    current_chat_id
+                                    if scope == "chat"
+                                    else None
+                                )
+                            )
+                        )
+
+                        st.session_state[
+                            "confirm_delete_task_scope"
+                        ] = None
+
+                        st.toast(
+                            f"Deleted {deleted} "
+                            "task snapshot(s)"
+                        )
+
+                        st.rerun()
+
+                    except MemoryServiceError as exc:
+                        st.error(str(exc))
+
+            with bulk_columns[1]:
+                if st.button(
+                    "Cancel",
+                    key=f"cancel_tasks_{scope}",
+                    use_container_width=True,
+                ):
+                    st.session_state[
+                        "confirm_delete_task_scope"
+                    ] = None
+
+                    st.rerun()
 
     with create_tab:
         with st.form(
