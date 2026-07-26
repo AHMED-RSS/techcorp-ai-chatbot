@@ -477,3 +477,4 @@ def study_session_from_dict(
             )
         ),
     )
+

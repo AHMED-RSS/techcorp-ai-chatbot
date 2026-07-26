@@ -6,15 +6,9 @@ from agents.critic import (
     CriticReport,
     critic_report_from_dict,
 )
-from core.exceptions import (
-    CriticError,
-)
-from services.critic_service import (
-    CriticService,
-)
-from ui.components import (
-    render_section_label,
-)
+from core.exceptions import CriticError
+from services.critic_service import CriticService
+from ui.components import render_section_label
 
 
 SEVERITY_ICONS = {
@@ -23,6 +17,62 @@ SEVERITY_ICONS = {
     "error": "❌",
     "critical": "🚨",
 }
+
+
+def _safe_score(
+    value: object,
+    default: float = 0.0,
+) -> float:
+    try:
+        score = float(
+            value
+        )
+
+    except (
+        TypeError,
+        ValueError,
+    ):
+        score = default
+
+    return max(
+        0.0,
+        min(
+            1.0,
+            score,
+        ),
+    )
+
+
+def _initialise_score_slider(
+) -> None:
+    if (
+        "critic_score_slider"
+        in st.session_state
+    ):
+        return
+
+    st.session_state[
+        "critic_score_slider"
+    ] = _safe_score(
+        st.session_state.get(
+            "critic_minimum_score",
+            0.75,
+        ),
+        default=0.75,
+    )
+
+
+def _sync_score_slider(
+) -> None:
+    st.session_state[
+        "critic_minimum_score"
+    ] = _safe_score(
+        st.session_state.get(
+            "critic_score_slider",
+            0.75,
+        ),
+        default=0.75,
+    )
 
 
 def render_critic_report(
@@ -86,9 +136,7 @@ def render_critic_report(
                 "#### Strengths"
             )
 
-            for strength in (
-                report.strengths
-            ):
+            for strength in report.strengths:
                 st.markdown(
                     f"- {strength}"
                 )
@@ -98,9 +146,7 @@ def render_critic_report(
                 "#### Findings"
             )
 
-            for finding in (
-                report.findings
-            ):
+            for finding in report.findings:
                 icon = SEVERITY_ICONS.get(
                     finding.severity,
                     "•",
@@ -172,8 +218,12 @@ def render_critic_sidebar(
             "Automatically apply revisions",
             key="automatic_critic_revision",
             disabled=(
-                not st.session_state
-                .automatic_critic_enabled
+                not bool(
+                    st.session_state.get(
+                        "automatic_critic_enabled",
+                        False,
+                    )
+                )
             ),
             help=(
                 "Replace a failed answer with the "
@@ -181,37 +231,51 @@ def render_critic_sidebar(
             ),
         )
 
+        _initialise_score_slider()
+
         threshold = st.slider(
             "Minimum quality score",
             min_value=0.0,
             max_value=1.0,
-            value=float(
-                st.session_state
-                .critic_minimum_score
-            ),
             step=0.05,
             disabled=(
-                not st.session_state
-                .automatic_critic_enabled
+                not bool(
+                    st.session_state.get(
+                        "automatic_critic_enabled",
+                        False,
+                    )
+                )
             ),
             key="critic_score_slider",
+            on_change=_sync_score_slider,
         )
 
-        st.session_state.critic_minimum_score = (
+        st.session_state[
+            "critic_minimum_score"
+        ] = float(
             threshold
         )
 
         current_report = (
-            st.session_state.current_critic_report
+            st.session_state.get(
+                "current_critic_report"
+            )
         )
 
         if isinstance(
             current_report,
             dict,
         ):
+            score = _safe_score(
+                current_report.get(
+                    "score",
+                    0,
+                )
+            )
+
             st.caption(
                 "Last review: "
-                f"{float(current_report.get('score', 0)):.0%} · "
+                f"{score:.0%} · "
                 + (
                     "Passed"
                     if current_report.get(
@@ -235,8 +299,11 @@ def render_critic_sidebar(
 
             except CriticError as exc:
                 st.error(
-                    str(exc)
+                    str(
+                        exc
+                    )
                 )
+
                 reports = []
 
             if not reports:
@@ -251,9 +318,14 @@ def render_critic_sidebar(
                     else "⚠️"
                 )
 
+                request_preview = (
+                    report.user_request[:60]
+                    or "Untitled request"
+                )
+
                 st.markdown(
                     f"**{icon} "
-                    f"{report.user_request[:60]}**"
+                    f"{request_preview}**"
                 )
 
                 st.caption(
@@ -269,13 +341,13 @@ def render_critic_sidebar(
                     ),
                     use_container_width=True,
                 ):
-                    st.session_state.current_critic_report = (
-                        report.to_dict()
-                    )
+                    st.session_state[
+                        "current_critic_report"
+                    ] = report.to_dict()
 
-                    st.session_state.current_critic_report_id = (
-                        report.id
-                    )
+                    st.session_state[
+                        "current_critic_report_id"
+                    ] = report.id
 
                     st.rerun()
 
@@ -291,26 +363,33 @@ def render_critic_workspace(
         "Critic reports are generated and stored locally."
     )
 
-    current_data = (
-        st.session_state.current_critic_report
+    current_data = st.session_state.get(
+        "current_critic_report"
     )
 
     if isinstance(
         current_data,
         dict,
     ):
-        current_report = (
-            critic_report_from_dict(
-                current_data
+        try:
+            current_report = (
+                critic_report_from_dict(
+                    current_data
+                )
             )
-        )
 
-        render_critic_report(
-            current_report,
-            expanded=True,
-        )
+            render_critic_report(
+                current_report,
+                expanded=True,
+            )
 
-        st.divider()
+            st.divider()
+
+        except Exception as exc:
+            st.warning(
+                f"The selected critic report "
+                f"could not be displayed: {exc}"
+            )
 
     try:
         reports = (
@@ -321,14 +400,18 @@ def render_critic_workspace(
 
     except CriticError as exc:
         st.error(
-            str(exc)
+            str(
+                exc
+            )
         )
+
         return
 
     if not reports:
         st.info(
             "No saved quality reviews."
         )
+
         return
 
     st.markdown(
@@ -371,13 +454,13 @@ def render_critic_workspace(
                     ),
                     use_container_width=True,
                 ):
-                    st.session_state.current_critic_report = (
-                        report.to_dict()
-                    )
+                    st.session_state[
+                        "current_critic_report"
+                    ] = report.to_dict()
 
-                    st.session_state.current_critic_report_id = (
-                        report.id
-                    )
+                    st.session_state[
+                        "current_critic_report_id"
+                    ] = report.id
 
                     st.rerun()
 
@@ -396,17 +479,18 @@ def render_critic_workspace(
                         )
 
                         if (
-                            st.session_state
-                            .current_critic_report_id
+                            st.session_state.get(
+                                "current_critic_report_id"
+                            )
                             == report.id
                         ):
-                            st.session_state.current_critic_report = (
-                                None
-                            )
+                            st.session_state[
+                                "current_critic_report"
+                            ] = None
 
-                            st.session_state.current_critic_report_id = (
-                                None
-                            )
+                            st.session_state[
+                                "current_critic_report_id"
+                            ] = None
 
                         st.toast(
                             "Review deleted"
@@ -416,5 +500,7 @@ def render_critic_workspace(
 
                     except CriticError as exc:
                         st.error(
-                            str(exc)
+                            str(
+                                exc
+                            )
                         )

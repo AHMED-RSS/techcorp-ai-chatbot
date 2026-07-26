@@ -22,6 +22,8 @@ dependencies = [
     "chromadb",
     "ddgs",
     "pytest",
+    "pytesseract>=0.3.13",
+    "pymupdf>=1.28.0",
 ]
 
 [project.scripts]

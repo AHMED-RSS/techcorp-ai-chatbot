@@ -1,6 +1,9 @@
 from __future__ import annotations
 
+import uuid
+
 from dataclasses import dataclass, field
+from datetime import datetime, timezone
 from typing import Any
 
 
@@ -22,39 +25,71 @@ VALID_STEP_STATUSES = {
 }
 
 
+def _utc_now() -> str:
+    return datetime.now(
+        timezone.utc
+    ).isoformat()
+
+
+def _normalise_string_list(
+    value: Any,
+) -> list[str]:
+    if not isinstance(
+        value,
+        list,
+    ):
+        return []
+
+    result: list[str] = []
+
+    for item in value:
+        cleaned = str(
+            item or ""
+        ).strip()
+
+        if cleaned:
+            result.append(
+                cleaned
+            )
+
+    return result
+
+
 @dataclass(slots=True)
 class PlanStep:
     """
-    One ordered step inside an agent plan.
+    One executable step inside an agent plan.
     """
 
     id: str
     order: int
     title: str
     description: str
+
     step_type: str = "reason"
     route: str = "general"
+
     skill_slug: str | None = None
     tool_name: str | None = None
+
     tool_arguments: dict[str, Any] = field(
         default_factory=dict
     )
+
     use_documents: bool = False
+
     depends_on: list[str] = field(
         default_factory=list
     )
+
     status: str = "pending"
+
     result: str | None = None
     error: str | None = None
 
-    def __post_init__(self) -> None:
-        self.id = str(
-            self.id or ""
-        ).strip()
-
-        if not self.id:
-            self.id = f"step_{self.order}"
-
+    def __post_init__(
+        self,
+    ) -> None:
         try:
             self.order = int(
                 self.order
@@ -66,49 +101,54 @@ class PlanStep:
         ):
             self.order = 1
 
-        self.order = max(
-            1,
-            self.order,
-        )
+        if self.order < 1:
+            self.order = 1
+
+        self.id = str(
+            self.id
+            or f"step_{self.order}"
+        ).strip()
 
         self.title = str(
-            self.title or "Untitled step"
-        ).strip()[:120]
+            self.title
+            or "Untitled step"
+        ).strip()
 
         self.description = str(
-            self.description or ""
-        ).strip()[:1000]
+            self.description
+            or ""
+        ).strip()
 
-        cleaned_type = str(
-            self.step_type or "reason"
+        self.step_type = str(
+            self.step_type
+            or "reason"
         ).strip().lower()
 
-        if cleaned_type not in VALID_STEP_TYPES:
-            cleaned_type = "reason"
-
-        self.step_type = cleaned_type
+        if self.step_type not in VALID_STEP_TYPES:
+            self.step_type = "reason"
 
         self.route = str(
-            self.route or "general"
+            self.route
+            or "general"
         ).strip().lower()
 
-        if self.skill_slug is not None:
-            cleaned_skill = str(
-                self.skill_slug
-            ).strip()
+        self.status = str(
+            self.status
+            or "pending"
+        ).strip().lower()
 
-            self.skill_slug = (
-                cleaned_skill or None
-            )
+        if self.status not in VALID_STEP_STATUSES:
+            self.status = "pending"
+
+        if self.skill_slug is not None:
+            self.skill_slug = str(
+                self.skill_slug
+            ).strip() or None
 
         if self.tool_name is not None:
-            cleaned_tool = str(
+            self.tool_name = str(
                 self.tool_name
-            ).strip().lower()
-
-            self.tool_name = (
-                cleaned_tool or None
-            )
+            ).strip() or None
 
         if not isinstance(
             self.tool_arguments,
@@ -120,26 +160,11 @@ class PlanStep:
             self.use_documents
         )
 
-        if not isinstance(
-            self.depends_on,
-            list,
-        ):
-            self.depends_on = []
-
-        self.depends_on = [
-            str(step_id).strip()
-            for step_id in self.depends_on
-            if str(step_id).strip()
-        ]
-
-        cleaned_status = str(
-            self.status or "pending"
-        ).strip().lower()
-
-        if cleaned_status not in VALID_STEP_STATUSES:
-            cleaned_status = "pending"
-
-        self.status = cleaned_status
+        self.depends_on = (
+            _normalise_string_list(
+                self.depends_on
+            )
+        )
 
         if self.result is not None:
             self.result = str(
@@ -163,9 +188,13 @@ class PlanStep:
             "route": self.route,
             "skill_slug": self.skill_slug,
             "tool_name": self.tool_name,
-            "tool_arguments": self.tool_arguments,
+            "tool_arguments": dict(
+                self.tool_arguments
+            ),
             "use_documents": self.use_documents,
-            "depends_on": self.depends_on,
+            "depends_on": list(
+                self.depends_on
+            ),
             "status": self.status,
             "result": self.result,
             "error": self.error,
@@ -175,7 +204,7 @@ class PlanStep:
 @dataclass(slots=True)
 class AgentPlan:
     """
-    Structured goal and ordered steps for a user request.
+    Autonomous execution plan.
     """
 
     id: str
@@ -187,36 +216,46 @@ class AgentPlan:
     route: str
     recommended_skill: str | None
     use_documents: bool
+
     steps: list[PlanStep] = field(
         default_factory=list
     )
+
     assumptions: list[str] = field(
         default_factory=list
     )
+
     success_criteria: list[str] = field(
         default_factory=list
     )
+
     status: str = "planned"
     created_at: str = ""
     updated_at: str = ""
-    source: str = "fallback"
+    source: str = "planner"
 
-    def __post_init__(self) -> None:
+    def __post_init__(
+        self,
+    ) -> None:
         self.id = str(
-            self.id or ""
+            self.id
+            or f"plan_{uuid.uuid4().hex[:8]}"
         ).strip()
 
         self.user_request = str(
-            self.user_request or ""
+            self.user_request
+            or ""
         ).strip()
 
         self.goal = str(
-            self.goal or self.user_request
-        ).strip()[:1000]
+            self.goal
+            or self.user_request
+        ).strip()
 
         self.summary = str(
-            self.summary or ""
-        ).strip()[:1500]
+            self.summary
+            or ""
+        ).strip()
 
         self.requires_plan = bool(
             self.requires_plan
@@ -231,7 +270,10 @@ class AgentPlan:
             TypeError,
             ValueError,
         ):
-            confidence = 0.0
+            confidence = 0.5
+
+        if confidence > 1.0 and confidence <= 100:
+            confidence /= 100
 
         self.confidence = max(
             0.0,
@@ -242,81 +284,97 @@ class AgentPlan:
         )
 
         self.route = str(
-            self.route or "general"
+            self.route
+            or "general"
         ).strip().lower()
 
         if self.recommended_skill is not None:
-            cleaned_skill = str(
+            self.recommended_skill = str(
                 self.recommended_skill
-            ).strip()
-
-            self.recommended_skill = (
-                cleaned_skill or None
-            )
+            ).strip() or None
 
         self.use_documents = bool(
             self.use_documents
         )
 
-        self.steps = sorted(
-            [
-                step
-                if isinstance(
-                    step,
-                    PlanStep,
-                )
-                else plan_step_from_dict(
+        normalised_steps: list[
+            PlanStep
+        ] = []
+
+        for step in self.steps:
+            if isinstance(
+                step,
+                PlanStep,
+            ):
+                normalised_steps.append(
                     step
                 )
-                for step in self.steps
-                if isinstance(
-                    step,
-                    (PlanStep, dict),
+
+            elif isinstance(
+                step,
+                dict,
+            ):
+                normalised_steps.append(
+                    plan_step_from_dict(
+                        step
+                    )
                 )
-            ],
-            key=lambda step: step.order,
+
+        normalised_steps.sort(
+            key=lambda step: (
+                step.order,
+                step.id,
+            )
         )
 
-        if not isinstance(
-            self.assumptions,
-            list,
-        ):
-            self.assumptions = []
+        self.steps = normalised_steps
 
-        self.assumptions = [
-            str(item).strip()
-            for item in self.assumptions
-            if str(item).strip()
-        ]
+        self.assumptions = (
+            _normalise_string_list(
+                self.assumptions
+            )
+        )
 
-        if not isinstance(
-            self.success_criteria,
-            list,
-        ):
-            self.success_criteria = []
-
-        self.success_criteria = [
-            str(item).strip()
-            for item in self.success_criteria
-            if str(item).strip()
-        ]
+        self.success_criteria = (
+            _normalise_string_list(
+                self.success_criteria
+            )
+        )
 
         self.status = str(
-            self.status or "planned"
+            self.status
+            or "planned"
         ).strip().lower()
 
+        now = _utc_now()
+
+        self.created_at = str(
+            self.created_at
+            or now
+        )
+
+        self.updated_at = str(
+            self.updated_at
+            or self.created_at
+        )
+
         self.source = str(
-            self.source or "fallback"
+            self.source
+            or "planner"
         ).strip()
 
     @property
-    def step_count(self) -> int:
+    def step_count(
+        self,
+    ) -> int:
         return len(
             self.steps
         )
 
     @property
-    def completed_step_count(self) -> int:
+    def completed_step_count(
+        self,
+    ) -> int:
         return sum(
             1
             for step in self.steps
@@ -337,15 +395,15 @@ class AgentPlan:
             "recommended_skill": (
                 self.recommended_skill
             ),
-            "use_documents": (
-                self.use_documents
-            ),
+            "use_documents": self.use_documents,
             "steps": [
                 step.to_dict()
                 for step in self.steps
             ],
-            "assumptions": self.assumptions,
-            "success_criteria": (
+            "assumptions": list(
+                self.assumptions
+            ),
+            "success_criteria": list(
                 self.success_criteria
             ),
             "status": self.status,
@@ -355,87 +413,297 @@ class AgentPlan:
         }
 
 
+def create_plan(
+    user_request: str,
+    route_decision: Any,
+) -> AgentPlan:
+    """
+    Convert a route decision into a simple executable plan.
+    """
+
+    route = str(
+        getattr(
+            route_decision,
+            "route",
+            "general",
+        )
+        or "general"
+    ).strip().lower()
+
+    skill = getattr(
+        route_decision,
+        "recommended_skill",
+        None,
+    )
+
+    use_documents = bool(
+        getattr(
+            route_decision,
+            "use_documents",
+            False,
+        )
+    )
+
+    try:
+        confidence = float(
+            getattr(
+                route_decision,
+                "confidence",
+                0.5,
+            )
+        )
+
+    except (
+        TypeError,
+        ValueError,
+    ):
+        confidence = 0.5
+
+    if route == "document":
+        steps = [
+            PlanStep(
+                id="retrieve_documents",
+                order=1,
+                title="Retrieve documents",
+                description=(
+                    "Search the indexed local documents for "
+                    "information relevant to the request."
+                ),
+                step_type="document_search",
+                route="document",
+                use_documents=True,
+            ),
+            PlanStep(
+                id="analyze_context",
+                order=2,
+                title="Analyse retrieved context",
+                description=(
+                    "Identify the relevant evidence and "
+                    "organise the important findings."
+                ),
+                step_type="reason",
+                route="document",
+                use_documents=True,
+                depends_on=[
+                    "retrieve_documents"
+                ],
+            ),
+            PlanStep(
+                id="generate_answer",
+                order=3,
+                title="Generate response",
+                description=(
+                    "Answer the user using the retrieved "
+                    "document evidence."
+                ),
+                step_type="write",
+                route="general",
+                use_documents=True,
+                depends_on=[
+                    "analyze_context"
+                ],
+            ),
+            PlanStep(
+                id="quality_check",
+                order=4,
+                title="Quality review",
+                description=(
+                    "Check that the final response is accurate, "
+                    "relevant and supported by evidence."
+                ),
+                step_type="review",
+                route="general",
+                depends_on=[
+                    "generate_answer"
+                ],
+            ),
+        ]
+
+    elif route == "vision":
+        steps = [
+            PlanStep(
+                id="image_analysis",
+                order=1,
+                title="Analyse image",
+                description=(
+                    "Inspect the image and extract relevant "
+                    "visual information."
+                ),
+                step_type="reason",
+                route="vision",
+            ),
+            PlanStep(
+                id="vision_response",
+                order=2,
+                title="Explain findings",
+                description=(
+                    "Provide a clear answer based on the "
+                    "visual analysis."
+                ),
+                step_type="write",
+                route="vision",
+                depends_on=[
+                    "image_analysis"
+                ],
+            ),
+        ]
+
+    elif route == "study":
+        steps = [
+            PlanStep(
+                id="study_analysis",
+                order=1,
+                title="Understand topic",
+                description=(
+                    "Analyse the requested topic and identify "
+                    "the learning objectives."
+                ),
+                step_type="reason",
+                route="study",
+            ),
+            PlanStep(
+                id="study_output",
+                order=2,
+                title="Create study material",
+                description=(
+                    "Generate the requested notes, quiz, "
+                    "flashcards or explanation."
+                ),
+                step_type="write",
+                route="study",
+                depends_on=[
+                    "study_analysis"
+                ],
+            ),
+        ]
+
+    else:
+        steps = [
+            PlanStep(
+                id="understand_request",
+                order=1,
+                title="Understand request",
+                description=(
+                    "Identify the user's objective and "
+                    "the required response."
+                ),
+                step_type="reason",
+                route=route,
+            ),
+            PlanStep(
+                id="final_answer",
+                order=2,
+                title="Answer user",
+                description=(
+                    "Produce a direct and complete response."
+                ),
+                step_type="write",
+                route=route,
+                depends_on=[
+                    "understand_request"
+                ],
+            ),
+        ]
+
+    now = _utc_now()
+
+    return AgentPlan(
+        id=f"plan_{uuid.uuid4().hex[:8]}",
+        user_request=user_request,
+        goal=(
+            f"Complete the request using the "
+            f"{route} route."
+        ),
+        summary=(
+            "Autonomous plan generated by the "
+            "planner agent."
+        ),
+        requires_plan=(
+            len(
+                steps
+            )
+            > 1
+        ),
+        confidence=confidence,
+        route=route,
+        recommended_skill=skill,
+        use_documents=use_documents,
+        steps=steps,
+        assumptions=[
+            (
+                "The user request has been routed "
+                "correctly."
+            )
+        ],
+        success_criteria=[
+            "All required steps are completed.",
+            (
+                "The final response addresses the "
+                "user's request."
+            ),
+        ],
+        status="planned",
+        created_at=now,
+        updated_at=now,
+        source="autonomous_planner",
+    )
+
+
 def plan_step_from_dict(
     data: dict[str, Any],
 ) -> PlanStep:
     return PlanStep(
-        id=str(
-            data.get(
-                "id",
-                "",
-            )
+        id=data.get(
+            "id",
+            "",
         ),
         order=data.get(
             "order",
             1,
         ),
-        title=str(
-            data.get(
-                "title",
-                "Untitled step",
-            )
+        title=data.get(
+            "title",
+            "",
         ),
-        description=str(
-            data.get(
-                "description",
-                "",
-            )
+        description=data.get(
+            "description",
+            "",
         ),
-        step_type=str(
-            data.get(
-                "step_type",
-                "reason",
-            )
+        step_type=data.get(
+            "step_type",
+            "reason",
         ),
-        route=str(
-            data.get(
-                "route",
-                "general",
-            )
+        route=data.get(
+            "route",
+            "general",
         ),
-        skill_slug=(
-            data.get(
-                "skill_slug"
-            )
+        skill_slug=data.get(
+            "skill_slug"
         ),
-        tool_name=(
-            data.get(
-                "tool_name"
-            )
+        tool_name=data.get(
+            "tool_name"
         ),
-        tool_arguments=(
-            data.get(
-                "tool_arguments",
-                {},
-            )
+        tool_arguments=data.get(
+            "tool_arguments",
+            {},
         ),
-        use_documents=bool(
-            data.get(
-                "use_documents",
-                False,
-            )
+        use_documents=data.get(
+            "use_documents",
+            False,
         ),
-        depends_on=(
-            data.get(
-                "depends_on",
-                [],
-            )
+        depends_on=data.get(
+            "depends_on",
+            [],
         ),
-        status=str(
-            data.get(
-                "status",
-                "pending",
-            )
+        status=data.get(
+            "status",
+            "pending",
         ),
-        result=(
-            data.get(
-                "result"
-            )
+        result=data.get(
+            "result"
         ),
-        error=(
-            data.get(
-                "error"
-            )
+        error=data.get(
+            "error"
         ),
     )
 
@@ -443,105 +711,83 @@ def plan_step_from_dict(
 def agent_plan_from_dict(
     data: dict[str, Any],
 ) -> AgentPlan:
+    raw_steps = data.get(
+        "steps",
+        [],
+    )
+
+    steps = [
+        plan_step_from_dict(
+            item
+        )
+        for item in raw_steps
+        if isinstance(
+            item,
+            dict,
+        )
+    ]
+
     return AgentPlan(
-        id=str(
-            data.get(
-                "id",
-                "",
-            )
+        id=data.get(
+            "id",
+            "",
         ),
-        user_request=str(
-            data.get(
-                "user_request",
-                "",
-            )
+        user_request=data.get(
+            "user_request",
+            "",
         ),
-        goal=str(
-            data.get(
-                "goal",
-                "",
-            )
+        goal=data.get(
+            "goal",
+            "",
         ),
-        summary=str(
-            data.get(
-                "summary",
-                "",
-            )
+        summary=data.get(
+            "summary",
+            "",
         ),
-        requires_plan=bool(
-            data.get(
-                "requires_plan",
-                False,
-            )
+        requires_plan=data.get(
+            "requires_plan",
+            bool(
+                steps
+            ),
         ),
         confidence=data.get(
             "confidence",
-            0.0,
+            0.5,
         ),
-        route=str(
-            data.get(
-                "route",
-                "general",
-            )
+        route=data.get(
+            "route",
+            "general",
         ),
-        recommended_skill=(
-            data.get(
-                "recommended_skill"
-            )
+        recommended_skill=data.get(
+            "recommended_skill"
         ),
-        use_documents=bool(
-            data.get(
-                "use_documents",
-                False,
-            )
+        use_documents=data.get(
+            "use_documents",
+            False,
         ),
-        steps=[
-            plan_step_from_dict(
-                step
-            )
-            for step in data.get(
-                "steps",
-                [],
-            )
-            if isinstance(
-                step,
-                dict,
-            )
-        ],
-        assumptions=(
-            data.get(
-                "assumptions",
-                [],
-            )
+        steps=steps,
+        assumptions=data.get(
+            "assumptions",
+            [],
         ),
-        success_criteria=(
-            data.get(
-                "success_criteria",
-                [],
-            )
+        success_criteria=data.get(
+            "success_criteria",
+            [],
         ),
-        status=str(
-            data.get(
-                "status",
-                "planned",
-            )
+        status=data.get(
+            "status",
+            "planned",
         ),
-        created_at=str(
-            data.get(
-                "created_at",
-                "",
-            )
+        created_at=data.get(
+            "created_at",
+            "",
         ),
-        updated_at=str(
-            data.get(
-                "updated_at",
-                "",
-            )
+        updated_at=data.get(
+            "updated_at",
+            "",
         ),
-        source=str(
-            data.get(
-                "source",
-                "fallback",
-            )
+        source=data.get(
+            "source",
+            "planner",
         ),
     )
