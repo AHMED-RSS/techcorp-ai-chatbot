@@ -60,3 +60,5 @@ desktop.ini
 *.zip
 *.tar
 *.tar.gz
+
+.agents/
