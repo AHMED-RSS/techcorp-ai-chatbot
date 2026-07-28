@@ -46,6 +46,60 @@ class Settings(BaseSettings):
         alias="APP_DEBUG",
     )
 
+    # Database
+    database_host: str = Field(
+        default="127.0.0.1",
+        alias="DATABASE_HOST",
+    )
+
+    database_port: int = Field(
+        default=5432,
+        alias="DATABASE_PORT",
+        ge=1,
+        le=65535,
+    )
+
+    database_name: str = Field(
+        default="techcorp_ai",
+        alias="DATABASE_NAME",
+    )
+
+    database_user: str = Field(
+        default="techcorp_app",
+        alias="DATABASE_USER",
+    )
+
+    database_password: str = Field(
+        default="",
+        alias="DATABASE_PASSWORD",
+    )
+
+    database_echo: bool = Field(
+        default=False,
+        alias="DATABASE_ECHO",
+    )
+
+    database_pool_size: int = Field(
+        default=5,
+        alias="DATABASE_POOL_SIZE",
+        ge=1,
+        le=50,
+    )
+
+    database_max_overflow: int = Field(
+        default=10,
+        alias="DATABASE_MAX_OVERFLOW",
+        ge=0,
+        le=100,
+    )
+
+    database_pool_timeout: int = Field(
+        default=30,
+        alias="DATABASE_POOL_TIMEOUT",
+        ge=1,
+        le=300,
+    )
+
     # Ollama
     ollama_host: str = Field(
         default="http://localhost:11434",
