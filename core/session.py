@@ -10,6 +10,9 @@ DEFAULT_SESSION_STATE: dict[str, Any] = {
     # Authentication
     "current_user": None,
     "current_user_id": None,
+    "database_connected": False,
+    "database_user_id": None,
+    "database_error": None,
 
     # Navigation
     "workspace": "chat",

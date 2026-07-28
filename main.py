@@ -10,6 +10,8 @@ from typing import Any
 
 import streamlit as st
 
+from sqlalchemy.exc import SQLAlchemyError
+
 from agents.composer import ComposerSubmission
 from agents.critic import (
     CriticReport,
@@ -69,6 +71,7 @@ from services.skill_service import (
 )
 from services.study_service import StudyService
 from services.tool_service import ToolService
+from services.user_service import UserService
 from services.web_search_service import (
     WebSearchReport,
     WebSearchService,
@@ -142,6 +145,8 @@ app = bootstrap_application()
 
 settings = app.settings
 
+user_service = UserService()
+
 chat_service: ChatService = app.chats
 file_service: FileService = app.files
 rag_service: RAGService = app.rag
@@ -164,6 +169,38 @@ st.session_state.current_user = (
 st.session_state.current_user_id = (
     user_context.user_id
 )
+
+try:
+    database_user = user_service.sync_user(
+        user_context
+    )
+
+    st.session_state.database_connected = True
+    st.session_state.database_user_id = (
+        database_user.user_id
+    )
+    st.session_state.database_error = None
+
+except (SQLAlchemyError, RuntimeError) as exc:
+    st.session_state.database_connected = False
+    st.session_state.database_user_id = None
+    st.session_state.database_error = str(exc)
+
+    st.error(
+        "TechCorp AI could not connect to "
+        "the user database."
+    )
+
+    if settings.app_debug:
+        st.exception(exc)
+    else:
+        st.caption(
+            "Check PostgreSQL and the database "
+            "configuration."
+        )
+
+    st.stop()
+
 
 apply_app_styles()
 
