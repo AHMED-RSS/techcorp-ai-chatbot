@@ -74,6 +74,10 @@ from services.web_search_service import (
     WebSearchService,
 )
 from tools.tool_models import ToolResult
+from ui.auth_panel import (
+    render_user_account,
+    require_authenticated_user,
+)
 from ui.chat_sidebar import (
     create_chat,
     render_conversation_sidebar,
@@ -131,6 +135,9 @@ st.set_page_config(
 )
 
 
+user_context = require_authenticated_user()
+
+
 app = bootstrap_application()
 
 settings = app.settings
@@ -150,6 +157,14 @@ web_service: WebSearchService = app.web
 
 
 initialise_session_state()
+
+st.session_state.current_user = (
+    user_context.to_dict()
+)
+st.session_state.current_user_id = (
+    user_context.user_id
+)
+
 apply_app_styles()
 
 if not st.session_state.selected_chat_model:
@@ -1943,6 +1958,10 @@ def run_critic(
 workspace = render_sidebar_header(
     settings=settings,
     create_chat_callback=create_new_conversation,
+)
+
+render_user_account(
+    user_context
 )
 
 render_conversation_sidebar(
