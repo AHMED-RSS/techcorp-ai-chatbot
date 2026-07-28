@@ -7,6 +7,10 @@ import streamlit as st
 
 
 DEFAULT_SESSION_STATE: dict[str, Any] = {
+    # Authentication
+    "current_user": None,
+    "current_user_id": None,
+
     # Navigation
     "workspace": "chat",
     "sidebar_expanded": True,
@@ -163,6 +167,14 @@ def initialise_session_state() -> None:
             st.session_state[key] = (
                 deepcopy(default_value)
             )
+
+
+def clear_user_session_state() -> None:
+    """
+    Remove all user-specific and widget state before logout.
+    """
+
+    st.session_state.clear()
 
 
 def reset_agent_state() -> None:
