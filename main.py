@@ -55,6 +55,12 @@ from core.session import (
     reset_agent_state,
 )
 from services.chat_service import ChatService
+from services.database_chat_service import (
+    DatabaseChatService,
+)
+from services.database_memory_service import (
+    DatabaseMemoryService,
+)
 from services.critic_service import CriticService
 from services.executor_service import ExecutorService
 from services.file_service import FileService
@@ -173,6 +179,14 @@ st.session_state.current_user_id = (
 try:
     database_user = user_service.sync_user(
         user_context
+    )
+
+    chat_service = DatabaseChatService(
+        user_id=database_user.user_id
+    )
+
+    memory_service = DatabaseMemoryService(
+        user_id=database_user.user_id
     )
 
     st.session_state.database_connected = True
@@ -555,7 +569,7 @@ def execute_memory_command(
         )
 
         return (
-            "Saved locally as "
+            "Saved as "
             + (
                 "chat memory."
                 if item.chat_id
@@ -609,7 +623,7 @@ def execute_memory_command(
         return "No active memories are stored."
 
     return (
-        "Active local memories:\n\n"
+        "Active memories:\n\n"
         + "\n".join(
             f"- [{item.kind}] {item.content}"
             for item in memories
