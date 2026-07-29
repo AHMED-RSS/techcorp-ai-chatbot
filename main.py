@@ -58,8 +58,15 @@ from services.chat_service import ChatService
 from services.database_chat_service import (
     DatabaseChatService,
 )
+from services.database_file_service import (
+    DatabaseFileService,
+    user_storage_key,
+)
 from services.database_memory_service import (
     DatabaseMemoryService,
+)
+from services.database_rag_service import (
+    DatabaseRAGService,
 )
 from services.critic_service import CriticService
 from services.executor_service import ExecutorService
@@ -81,6 +88,9 @@ from services.user_service import UserService
 from services.web_search_service import (
     WebSearchReport,
     WebSearchService,
+)
+from tools.local_tools import (
+    build_local_tool_service,
 )
 from tools.tool_models import ToolResult
 from ui.auth_panel import (
@@ -181,12 +191,86 @@ try:
         user_context
     )
 
+    storage_key = user_storage_key(
+        database_user.user_id
+    )
+
+    user_runtime_settings = settings.model_copy(
+        update={
+            "task_folder": (
+                settings.task_folder
+                / "users"
+                / storage_key
+            ),
+            "agent_run_folder": (
+                settings.agent_run_folder
+                / "users"
+                / storage_key
+            ),
+            "report_folder": (
+                settings.report_folder
+                / "users"
+                / storage_key
+            ),
+        }
+    )
+
+    user_runtime_settings.create_runtime_directories()
+
     chat_service = DatabaseChatService(
         user_id=database_user.user_id
     )
 
     memory_service = DatabaseMemoryService(
         user_id=database_user.user_id
+    )
+
+    file_service = DatabaseFileService(
+        user_id=database_user.user_id,
+        settings=user_runtime_settings,
+    )
+
+    rag_service = DatabaseRAGService(
+        user_id=database_user.user_id,
+        settings=user_runtime_settings,
+        ollama_manager=app.ollama,
+    )
+
+    tool_service = build_local_tool_service(
+        settings=user_runtime_settings,
+        file_service=file_service,
+        rag_service=rag_service,
+        skill_service=skill_service,
+    )
+
+    router_service = RouterService(
+        settings=user_runtime_settings,
+        ollama_manager=app.ollama,
+        skill_service=skill_service,
+        tool_service=tool_service,
+    )
+
+    planner_service = PlannerService(
+        settings=user_runtime_settings,
+        ollama_manager=app.ollama,
+        skill_service=skill_service,
+        tool_service=tool_service,
+    )
+
+    executor_service = ExecutorService(
+        settings=user_runtime_settings,
+        ollama_manager=app.ollama,
+        planner_service=planner_service,
+        rag_service=rag_service,
+        skill_service=skill_service,
+        tool_service=tool_service,
+    )
+
+    study_service = StudyService(
+        settings=user_runtime_settings,
+        ollama_manager=app.ollama,
+        rag_service=rag_service,
+        file_service=file_service,
     )
 
     st.session_state.database_connected = True
