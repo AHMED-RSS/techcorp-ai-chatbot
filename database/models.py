@@ -504,3 +504,137 @@ class TaskSnapshot(Base):
         server_default=func.now(),
     )
 
+class DocumentRecord(Base):
+    """
+    Parsed document metadata and extracted text owned by one user.
+    """
+
+    __tablename__ = "documents"
+
+    __table_args__ = (
+        Index(
+            "ix_documents_user_updated",
+            "user_id",
+            "updated_at",
+        ),
+        Index(
+            "ix_documents_user_sha256",
+            "user_id",
+            "sha256",
+        ),
+    )
+
+    document_id: Mapped[str] = mapped_column(
+        String(36),
+        primary_key=True,
+    )
+
+    user_id: Mapped[str] = mapped_column(
+        String(255),
+        ForeignKey(
+            "users.user_id",
+            ondelete="CASCADE",
+        ),
+        nullable=False,
+        index=True,
+    )
+
+    title: Mapped[str] = mapped_column(
+        String(500),
+        nullable=False,
+    )
+
+    original_name: Mapped[str] = mapped_column(
+        String(500),
+        nullable=False,
+    )
+
+    stored_filename: Mapped[str] = mapped_column(
+        String(600),
+        nullable=False,
+    )
+
+    stored_path: Mapped[str] = mapped_column(
+        Text,
+        nullable=False,
+    )
+
+    mime_type: Mapped[str] = mapped_column(
+        String(255),
+        nullable=False,
+    )
+
+    extension: Mapped[str] = mapped_column(
+        String(50),
+        nullable=False,
+        default="",
+    )
+
+    category: Mapped[str] = mapped_column(
+        String(50),
+        nullable=False,
+        default="unknown",
+    )
+
+    size_bytes: Mapped[int] = mapped_column(
+        Integer,
+        nullable=False,
+    )
+
+    sha256: Mapped[str] = mapped_column(
+        String(64),
+        nullable=False,
+    )
+
+    extracted_text: Mapped[str] = mapped_column(
+        Text,
+        nullable=False,
+        default="",
+    )
+
+    character_count: Mapped[int] = mapped_column(
+        Integer,
+        nullable=False,
+        default=0,
+    )
+
+    text_truncated: Mapped[bool] = mapped_column(
+        Boolean,
+        nullable=False,
+        default=False,
+        server_default=false(),
+    )
+
+    metadata_json: Mapped[
+        dict[str, Any]
+    ] = mapped_column(
+        "metadata",
+        JSON,
+        nullable=False,
+        default=dict,
+    )
+
+    warnings_json: Mapped[
+        list[str]
+    ] = mapped_column(
+        "warnings",
+        JSON,
+        nullable=False,
+        default=list,
+    )
+
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        default=utc_now,
+        server_default=func.now(),
+    )
+
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        default=utc_now,
+        onupdate=utc_now,
+        server_default=func.now(),
+    )
+

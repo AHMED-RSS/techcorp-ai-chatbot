@@ -252,9 +252,74 @@ def allowed_roots(
     )
 
 
+def path_is_within(
+    path: Path,
+    root: Path,
+) -> bool:
+    try:
+        path.relative_to(
+            root
+        )
+
+        return True
+
+    except ValueError:
+        return False
+
+
+def enforce_user_document_access(
+    *,
+    settings: Settings,
+    file_service: FileService,
+    path: Path,
+) -> None:
+    resolved = path.resolve()
+
+    protected_roots = (
+        (
+            settings.upload_folder
+            / "users"
+        ).resolve(),
+        (
+            settings.document_folder
+            / "users"
+        ).resolve(),
+    )
+
+    if not any(
+        path_is_within(
+            resolved,
+            root,
+        )
+        for root in protected_roots
+    ):
+        return
+
+    private_roots = (
+        file_service.upload_folder.resolve(),
+        file_service.document_folder.resolve(),
+    )
+
+    if any(
+        path_is_within(
+            resolved,
+            root,
+        )
+        for root in private_roots
+    ):
+        return
+
+    raise ToolExecutionError(
+        "Access to another user's document "
+        "storage is not allowed."
+    )
+
+
 def resolve_safe_path(
     settings: Settings,
     requested_path: str,
+    *,
+    file_service: FileService | None = None,
 ) -> Path:
     root = project_root_from_settings(
         settings
@@ -296,6 +361,13 @@ def resolve_safe_path(
     if not permitted:
         raise ToolExecutionError(
             "Access to that path is not allowed."
+        )
+
+    if file_service is not None:
+        enforce_user_document_access(
+            settings=settings,
+            file_service=file_service,
+            path=resolved,
         )
 
     return resolved
@@ -466,6 +538,7 @@ def build_local_tool_service(
         folder = resolve_safe_path(
             settings,
             folder_value,
+            file_service=file_service,
         )
 
         if not folder.exists():
@@ -495,6 +568,16 @@ def build_local_tool_service(
         ] = []
 
         for path in iterator:
+            try:
+                enforce_user_document_access(
+                    settings=settings,
+                    file_service=file_service,
+                    path=path,
+                )
+
+            except ToolExecutionError:
+                continue
+
             try:
                 relative_path = path.relative_to(
                     project_root
@@ -619,6 +702,7 @@ def build_local_tool_service(
         path = resolve_safe_path(
             settings,
             requested_path,
+            file_service=file_service,
         )
 
         if not path.exists():
