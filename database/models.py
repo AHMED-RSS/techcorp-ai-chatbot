@@ -638,3 +638,137 @@ class DocumentRecord(Base):
         server_default=func.now(),
     )
 
+
+class StudySessionRecord(Base):
+    """
+    User-owned study material generated from local documents.
+    """
+
+    __tablename__ = "study_sessions"
+
+    __table_args__ = (
+        Index(
+            "ix_study_sessions_user_updated",
+            "user_id",
+            "updated_at",
+        ),
+        Index(
+            "ix_study_sessions_user_type_updated",
+            "user_id",
+            "study_type",
+            "updated_at",
+        ),
+    )
+
+    session_id: Mapped[str] = mapped_column(
+        String(36),
+        primary_key=True,
+    )
+
+    user_id: Mapped[str] = mapped_column(
+        String(255),
+        ForeignKey(
+            "users.user_id",
+            ondelete="CASCADE",
+        ),
+        nullable=False,
+        index=True,
+    )
+
+    study_type: Mapped[str] = mapped_column(
+        String(32),
+        nullable=False,
+    )
+
+    title: Mapped[str] = mapped_column(
+        String(200),
+        nullable=False,
+    )
+
+    instruction: Mapped[str] = mapped_column(
+        Text,
+        nullable=False,
+        default="",
+    )
+
+    document_ids_json: Mapped[
+        list[str]
+    ] = mapped_column(
+        "document_ids",
+        JSON,
+        nullable=False,
+        default=list,
+    )
+
+    document_titles_json: Mapped[
+        list[str]
+    ] = mapped_column(
+        "document_titles",
+        JSON,
+        nullable=False,
+        default=list,
+    )
+
+    model: Mapped[str] = mapped_column(
+        String(255),
+        nullable=False,
+        default="",
+    )
+
+    content: Mapped[str] = mapped_column(
+        Text,
+        nullable=False,
+        default="",
+    )
+
+    flashcards_json: Mapped[
+        list[dict[str, Any]]
+    ] = mapped_column(
+        "flashcards",
+        JSON,
+        nullable=False,
+        default=list,
+    )
+
+    quiz_questions_json: Mapped[
+        list[dict[str, Any]]
+    ] = mapped_column(
+        "quiz_questions",
+        JSON,
+        nullable=False,
+        default=list,
+    )
+
+    sources_json: Mapped[
+        list[dict[str, Any]]
+    ] = mapped_column(
+        "sources",
+        JSON,
+        nullable=False,
+        default=list,
+    )
+
+    metadata_json: Mapped[
+        dict[str, Any]
+    ] = mapped_column(
+        "metadata",
+        JSON,
+        nullable=False,
+        default=dict,
+    )
+
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        default=utc_now,
+        server_default=func.now(),
+    )
+
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        default=utc_now,
+        onupdate=utc_now,
+        server_default=func.now(),
+    )
+
