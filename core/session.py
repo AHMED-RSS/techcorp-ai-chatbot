@@ -13,6 +13,9 @@ DEFAULT_SESSION_STATE: dict[str, Any] = {
     "database_connected": False,
     "database_user_id": None,
     "database_error": None,
+    "preferences_loaded_user_id": None,
+    "user_theme": "system",
+    "preference_error": None,
 
     # Navigation
     "workspace": "chat",
@@ -170,6 +173,52 @@ def initialise_session_state() -> None:
             st.session_state[key] = (
                 deepcopy(default_value)
             )
+
+
+def bind_authenticated_user(
+    user_id: str,
+) -> bool:
+    """
+    Bind Streamlit state to one authenticated user.
+
+    When the identity changes in the same browser session,
+    all existing user and widget state is removed before
+    defaults are restored.
+    """
+
+    cleaned_user_id = str(
+        user_id or ""
+    ).strip()
+
+    if not cleaned_user_id:
+        raise ValueError(
+            "An authenticated user ID is required."
+        )
+
+    previous_user_id = str(
+        st.session_state.get(
+            "current_user_id",
+            "",
+        )
+        or ""
+    ).strip()
+
+    user_changed = bool(
+        previous_user_id
+        and previous_user_id
+        != cleaned_user_id
+    )
+
+    if user_changed:
+        st.session_state.clear()
+
+    initialise_session_state()
+
+    st.session_state[
+        "current_user_id"
+    ] = cleaned_user_id
+
+    return user_changed
 
 
 def clear_user_session_state() -> None:
