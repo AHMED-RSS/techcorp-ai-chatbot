@@ -69,6 +69,9 @@ from services.database_memory_service import (
 from services.database_rag_service import (
     DatabaseRAGService,
 )
+from services.database_study_service import (
+    DatabaseStudyService,
+)
 from services.critic_service import CriticService
 from services.executor_service import ExecutorService
 from services.file_service import FileService
@@ -299,7 +302,8 @@ try:
         tool_service=tool_service,
     )
 
-    study_service = StudyService(
+    study_service = DatabaseStudyService(
+        user_id=database_user.user_id,
         settings=user_runtime_settings,
         ollama_manager=app.ollama,
         rag_service=rag_service,
