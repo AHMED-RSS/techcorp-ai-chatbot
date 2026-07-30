@@ -43,6 +43,7 @@ from core.exceptions import (
     WebSearchError,
 )
 from core.session import (
+    bind_authenticated_user,
     clear_rag_results,
     initialise_session_state,
     is_stop_requested,
@@ -177,19 +178,51 @@ study_service: StudyService = app.study
 web_service: WebSearchService = app.web
 
 
-initialise_session_state()
+bind_authenticated_user(
+    user_context.user_id
+)
 
 st.session_state.current_user = (
     user_context.to_dict()
-)
-st.session_state.current_user_id = (
-    user_context.user_id
 )
 
 try:
     database_user = user_service.sync_user(
         user_context
     )
+
+    user_preferences = (
+        user_service.get_preferences(
+            database_user.user_id
+        )
+    )
+
+    if user_preferences is None:
+        raise RuntimeError(
+            "The user preference record "
+            "could not be loaded."
+        )
+
+    if (
+        st.session_state
+        .preferences_loaded_user_id
+        != database_user.user_id
+    ):
+        st.session_state.selected_chat_model = (
+            user_preferences
+            .preferred_chat_model
+            or settings.ollama_chat_model
+        )
+
+        st.session_state.user_theme = (
+            user_preferences.theme
+        )
+
+        st.session_state[
+            "preferences_loaded_user_id"
+        ] = database_user.user_id
+
+        st.session_state.preference_error = None
 
     storage_key = user_storage_key(
         database_user.user_id
@@ -389,6 +422,40 @@ MULTI_STEP_REQUEST_TERMS = (
     "research and",
     "plan and execute",
 )
+
+
+def persist_selected_chat_model() -> None:
+    selected_model = str(
+        st.session_state.get(
+            "local_model_selectbox",
+            "",
+        )
+        or ""
+    ).strip()
+
+    if not selected_model:
+        return
+
+    st.session_state.selected_chat_model = (
+        selected_model
+    )
+
+    try:
+        user_service.set_preferred_chat_model(
+            user_id=database_user.user_id,
+            model=selected_model,
+        )
+
+        st.session_state.preference_error = None
+
+    except (
+        SQLAlchemyError,
+        RuntimeError,
+        ValueError,
+    ) as exc:
+        st.session_state.preference_error = (
+            str(exc)
+        )
 
 
 def refresh_ollama_status() -> None:
@@ -2173,15 +2240,30 @@ with st.sidebar:
                 else installed_models[0]
             )
 
-        st.session_state.selected_chat_model = (
-            st.selectbox(
-                "Chat model",
-                options=installed_models,
-                index=installed_models.index(
-                    selected
-                ),
-                key="local_model_selectbox",
+        widget_model = (
+            st.session_state.get(
+                "local_model_selectbox"
             )
+        )
+
+        if widget_model not in installed_models:
+            st.session_state[
+                "local_model_selectbox"
+            ] = selected
+
+        st.selectbox(
+            "Chat model",
+            options=installed_models,
+            key="local_model_selectbox",
+            on_change=(
+                persist_selected_chat_model
+            ),
+        )
+
+        st.session_state.selected_chat_model = (
+            st.session_state[
+                "local_model_selectbox"
+            ]
         )
 
     else:
@@ -2217,6 +2299,7 @@ render_current_workspace(
 
 
 for error_key in (
+    "preference_error",
     "chat_error",
     "rag_error",
     "memory_error",
