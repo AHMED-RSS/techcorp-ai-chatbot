@@ -88,6 +88,9 @@ from services.skill_service import (
 )
 from services.study_service import StudyService
 from services.tool_service import ToolService
+from services.user_data_service import (
+    UserDataService,
+)
 from services.user_service import UserService
 from services.web_search_service import (
     WebSearchReport,
@@ -270,6 +273,13 @@ try:
         user_id=database_user.user_id,
         settings=user_runtime_settings,
         ollama_manager=app.ollama,
+    )
+
+    user_data_service = UserDataService(
+        user_id=database_user.user_id,
+        settings=user_runtime_settings,
+        file_service=file_service,
+        rag_service=rag_service,
     )
 
     tool_service = build_local_tool_service(
@@ -2167,7 +2177,8 @@ workspace = render_sidebar_header(
 )
 
 render_user_account(
-    user_context
+    user_context,
+    user_data_service=user_data_service,
 )
 
 render_conversation_sidebar(

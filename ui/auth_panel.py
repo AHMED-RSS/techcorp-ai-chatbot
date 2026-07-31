@@ -6,6 +6,10 @@ from core.session import (
     clear_user_session_state,
 )
 from core.user_context import UserContext
+from services.user_data_service import (
+    UserDataError,
+    UserDataService,
+)
 
 
 def render_login_screen() -> None:
@@ -101,6 +105,8 @@ def require_authenticated_user(
 
 def render_user_account(
     user: UserContext,
+    *,
+    user_data_service: UserDataService,
 ) -> None:
     """Render the authenticated account controls."""
 
@@ -145,9 +151,103 @@ def render_user_account(
             clear_user_session_state()
             st.logout()
 
+        with st.expander(
+            "Your data",
+            expanded=False,
+        ):
+            st.write(
+                "Download a JSON copy of your local "
+                "TechCorp AI account data."
+            )
+
+            try:
+                export_data = (
+                    user_data_service.export_json()
+                )
+
+            except UserDataError as exc:
+                st.error(
+                    "Your data export could not "
+                    "be prepared."
+                )
+
+                st.caption(
+                    str(exc)
+                )
+
+            else:
+                st.download_button(
+                    "Download my data",
+                    data=export_data,
+                    file_name=(
+                        "techcorp-ai-user-data.json"
+                    ),
+                    mime="application/json",
+                    use_container_width=True,
+                    key="download_user_data",
+                )
+
+            st.divider()
+
+            st.warning(
+                "Deleting your local account permanently "
+                "removes your TechCorp AI chats, memories, "
+                "documents, study sessions and local files. "
+                "Your Auth0 identity is not deleted."
+            )
+
+            confirmation = st.text_input(
+                "Type DELETE to confirm",
+                key=(
+                    "delete_local_account_"
+                    "confirmation"
+                ),
+            )
+
+            if st.button(
+                "Delete local account data",
+                type="primary",
+                use_container_width=True,
+                disabled=(
+                    confirmation.strip()
+                    != "DELETE"
+                ),
+                key=(
+                    "delete_local_account_button"
+                ),
+            ):
+                try:
+                    result = (
+                        user_data_service
+                        .delete_local_account()
+                    )
+
+                except UserDataError as exc:
+                    st.error(
+                        "The local account could "
+                        "not be deleted."
+                    )
+
+                    st.caption(
+                        str(exc)
+                    )
+
+                else:
+                    if result.get(
+                        "deleted"
+                    ):
+                        clear_user_session_state()
+                        st.logout()
+
+                    else:
+                        st.warning(
+                            "The local account was "
+                            "not found."
+                        )
+
         st.caption(
-            "Authentication is active. Per-user data "
-            "isolation will be added in the next phase."
+            "Your local application data is isolated "
+            "to this authenticated account."
         )
 
         st.divider()
