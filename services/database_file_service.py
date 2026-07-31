@@ -2,6 +2,7 @@
 
 import hashlib
 import json
+import shutil
 
 from pathlib import Path
 from typing import Any
@@ -573,3 +574,64 @@ class DatabaseFileService(FileService):
                 "Could not delete document "
                 f"metadata: {exc}"
             ) from exc
+
+    def delete_user_storage(
+        self,
+    ) -> dict[str, int]:
+        """
+        Remove filesystem folders belonging only to this user.
+        """
+
+        owned_folders = (
+            (
+                self.upload_folder,
+                self.settings.upload_folder
+                / "users",
+            ),
+            (
+                self.document_folder,
+                self.settings.document_folder
+                / "users",
+            ),
+        )
+
+        deleted_folders = 0
+
+        for folder, parent in owned_folders:
+            resolved_folder = folder.resolve()
+            resolved_parent = parent.resolve()
+
+            try:
+                resolved_folder.relative_to(
+                    resolved_parent
+                )
+
+            except ValueError as exc:
+                raise FileProcessingError(
+                    "Refusing to delete a folder outside "
+                    "the authenticated user's storage."
+                ) from exc
+
+            if resolved_folder == resolved_parent:
+                raise FileProcessingError(
+                    "Refusing to delete the shared "
+                    "user-storage directory."
+                )
+
+            if resolved_folder.exists():
+                try:
+                    shutil.rmtree(
+                        resolved_folder
+                    )
+
+                except OSError as exc:
+                    raise FileProcessingError(
+                        "Could not delete the user's "
+                        f"document storage: {exc}"
+                    ) from exc
+
+                deleted_folders += 1
+
+        return {
+            "deleted_folders": deleted_folders,
+        }

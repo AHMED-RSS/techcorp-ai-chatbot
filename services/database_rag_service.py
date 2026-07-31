@@ -517,3 +517,29 @@ class DatabaseRAGService(RAGService):
             "failed_documents": failures,
             "total_chunks": total_chunks,
         }
+
+    def delete_user_index(
+        self,
+    ) -> dict[str, int | str | bool]:
+        """
+        Delete this authenticated user's complete collection.
+        """
+
+        deleted_chunks = self.count_chunks()
+
+        try:
+            self.client.delete_collection(
+                name=self.collection_name
+            )
+
+        except Exception as exc:
+            raise FileProcessingError(
+                "Could not delete the user's "
+                f"document index: {exc}"
+            ) from exc
+
+        return {
+            "deleted": True,
+            "collection": self.collection_name,
+            "deleted_chunks": deleted_chunks,
+        }
