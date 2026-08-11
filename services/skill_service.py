@@ -318,6 +318,12 @@ class SkillService:
                 folder / SKILL_INSTRUCTION_FILENAME
             )
 
+            if (
+                manifest_path.exists()
+                and instruction_path.exists()
+            ):
+                continue
+
             folder.mkdir(
                 parents=True,
                 exist_ok=True,

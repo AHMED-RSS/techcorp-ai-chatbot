@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 from datetime import datetime
 from typing import Any
@@ -12,6 +12,7 @@ from sqlalchemy import (
     Integer,
     String,
     Text,
+    UniqueConstraint,
     false,
     func,
 )
@@ -755,6 +756,106 @@ class StudySessionRecord(Base):
         JSON,
         nullable=False,
         default=dict,
+    )
+
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        default=utc_now,
+        server_default=func.now(),
+    )
+
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        default=utc_now,
+        onupdate=utc_now,
+        server_default=func.now(),
+    )
+
+
+
+class UserSkillRecord(Base):
+    """
+    User-owned custom skills and per-user built-in skill overrides.
+    """
+
+    __tablename__ = "user_skills"
+
+    __table_args__ = (
+        UniqueConstraint(
+            "user_id",
+            "slug",
+            name="uq_user_skills_user_slug",
+        ),
+        Index(
+            "ix_user_skills_user_updated",
+            "user_id",
+            "updated_at",
+        ),
+    )
+
+    skill_id: Mapped[str] = mapped_column(
+        String(36),
+        primary_key=True,
+    )
+
+    user_id: Mapped[str] = mapped_column(
+        String(255),
+        ForeignKey(
+            "users.user_id",
+            ondelete="CASCADE",
+        ),
+        nullable=False,
+        index=True,
+    )
+
+    slug: Mapped[str] = mapped_column(
+        String(100),
+        nullable=False,
+    )
+
+    name: Mapped[str] = mapped_column(
+        String(120),
+        nullable=False,
+    )
+
+    description: Mapped[str] = mapped_column(
+        Text,
+        nullable=False,
+    )
+
+    instructions: Mapped[str] = mapped_column(
+        Text,
+        nullable=False,
+    )
+
+    icon: Mapped[str] = mapped_column(
+        String(16),
+        nullable=False,
+        default="\u2728",
+    )
+
+    keywords_json: Mapped[
+        list[str]
+    ] = mapped_column(
+        "keywords",
+        JSON,
+        nullable=False,
+        default=list,
+    )
+
+    built_in: Mapped[bool] = mapped_column(
+        Boolean,
+        nullable=False,
+        default=False,
+        server_default=false(),
+    )
+
+    enabled: Mapped[bool] = mapped_column(
+        Boolean,
+        nullable=False,
+        default=True,
     )
 
     created_at: Mapped[datetime] = mapped_column(

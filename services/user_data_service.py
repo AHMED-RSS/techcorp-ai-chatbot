@@ -21,6 +21,7 @@ from database.models import (
     DocumentRecord,
     MemoryRecord,
     StudySessionRecord,
+    UserSkillRecord,
     TaskSnapshot,
     User,
     UserSettings,
@@ -234,6 +235,18 @@ class UserDataService:
                     StudySessionRecord.created_at
                 )
             ).all()
+
+            user_skills = session.scalars(
+                select(
+                    UserSkillRecord
+                ).where(
+                    UserSkillRecord.user_id
+                    == self.user_id
+                ).order_by(
+                    UserSkillRecord.created_at
+                )
+            ).all()
+
 
             export = {
                 "schema_version": 1,
@@ -480,6 +493,33 @@ class UserDataService:
                     }
                     for record in documents
                 ],
+                "skills": [
+                    {
+                        "skill_id": record.skill_id,
+                        "slug": record.slug,
+                        "name": record.name,
+                        "description": record.description,
+                        "instructions": record.instructions,
+                        "icon": record.icon,
+                        "keywords": list(
+                            record.keywords_json
+                            or []
+                        ),
+                        "built_in": record.built_in,
+                        "enabled": record.enabled,
+                        "created_at": (
+                            self._datetime_text(
+                                record.created_at
+                            )
+                        ),
+                        "updated_at": (
+                            self._datetime_text(
+                                record.updated_at
+                            )
+                        ),
+                    }
+                    for record in user_skills
+                ],
                 "study_sessions": [
                     {
                         "session_id": (
@@ -551,6 +591,9 @@ class UserDataService:
             ),
             "documents": len(
                 export["documents"]
+            ),
+            "skills": len(
+                export["skills"]
             ),
             "study_sessions": len(
                 export["study_sessions"]
@@ -682,6 +725,10 @@ class UserDataService:
                     (
                         "tasks",
                         TaskSnapshot,
+                    ),
+                    (
+                        "skills",
+                        UserSkillRecord,
                     ),
                     (
                         "study_sessions",
