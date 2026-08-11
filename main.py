@@ -69,6 +69,9 @@ from services.database_memory_service import (
 from services.database_rag_service import (
     DatabaseRAGService,
 )
+from services.database_skill_service import (
+    DatabaseSkillService,
+)
 from services.database_study_service import (
     DatabaseStudyService,
 )
@@ -273,6 +276,10 @@ try:
         user_id=database_user.user_id,
         settings=user_runtime_settings,
         ollama_manager=app.ollama,
+    )
+    skill_service = DatabaseSkillService(
+        user_id=database_user.user_id,
+        settings=user_runtime_settings,
     )
 
     user_data_service = UserDataService(

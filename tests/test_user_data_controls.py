@@ -26,6 +26,7 @@ from database.models import (
     DocumentRecord,
     MemoryRecord,
     StudySessionRecord,
+    UserSkillRecord,
     TaskSnapshot,
     User,
     UserSettings,
@@ -199,6 +200,29 @@ def add_user_records(
             sources_json=[],
             metadata_json={},
         )
+	)
+
+
+    session.add(
+        UserSkillRecord(
+            skill_id=f"skill-{suffix}",
+            user_id=user_id,
+            slug=f"private_skill_{suffix}",
+            name=f"Private Skill {suffix.upper()}",
+            description=(
+                f"Private skill description {suffix}"
+            ),
+            instructions=(
+                f"Private skill instructions for user "
+                f"{suffix} that must remain isolated."
+            ),
+            icon="\u2728",
+            keywords_json=[
+                f"private-{suffix}"
+            ],
+            built_in=False,
+            enabled=True,
+        )
     )
 
 
@@ -323,6 +347,7 @@ def test_export_contains_only_authenticated_user_data(
         "memories": 1,
         "tasks": 1,
         "documents": 1,
+        "skills": 1,
         "study_sessions": 1,
     }
 
@@ -332,10 +357,12 @@ def test_export_contains_only_authenticated_user_data(
 
     assert "Private message a" in encoded
     assert "Private study content a" in encoded
+    assert "Private Skill A" in encoded
 
     assert "b@example.com" not in encoded
     assert "Private message b" not in encoded
     assert "Private study content b" not in encoded
+    assert "Private Skill B" not in encoded
 
 
 def test_export_omits_local_document_paths(
@@ -379,6 +406,7 @@ def test_delete_removes_only_owned_database_records(
         TaskSnapshot,
         DocumentRecord,
         StudySessionRecord,
+        UserSkillRecord,
         UserSettings,
     )
 
