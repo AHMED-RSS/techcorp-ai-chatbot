@@ -158,7 +158,7 @@ def bootstrap_application(
 
     critic_service = CriticService(
         settings=settings,
-        ollama_manager=ollama_manager,
+        llm=ai_provider,
     )
 
     memory_service = MemoryService(
@@ -195,6 +195,4 @@ def bootstrap_application(
     )
 
     return _CONTEXT
-
-
 
