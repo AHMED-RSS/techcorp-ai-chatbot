@@ -70,3 +70,5 @@ desktop.ini
 # Python cache
 *.pyc
 .streamlit/secrets.*.toml
+
+.agents/
