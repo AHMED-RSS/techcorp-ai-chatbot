@@ -142,7 +142,7 @@ def bootstrap_application(
 
     planner_service = PlannerService(
         settings=settings,
-        ollama_manager=ollama_manager,
+        ai_provider=ai_provider,
         skill_service=skill_service,
         tool_service=tool_service,
     )
