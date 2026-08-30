@@ -481,12 +481,12 @@ def persist_selected_chat_model() -> None:
 
 def refresh_ollama_status() -> None:
     try:
-        connected = app.ollama.health_check()
+        connected = app.ai.health_check()
 
         st.session_state.ollama_connected = connected
 
         st.session_state.ollama_models = (
-            app.ollama.list_models()
+            app.ai.list_models()
             if connected
             else []
         )
@@ -1614,7 +1614,7 @@ def generate_vision_answer(
         or "gemma3:4b"
     )
 
-    return app.ollama.chat(
+    return app.ai.chat(
         model=vision_model,
         temperature=0.1,
         system_prompt="""
@@ -2054,7 +2054,7 @@ EVIDENCE RULES:
             },
         )
 
-    output = app.ollama.chat(
+    output = app.ai.chat(
         messages=messages,
         model=(
             st.session_state.selected_chat_model

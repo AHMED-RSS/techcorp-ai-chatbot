@@ -135,7 +135,7 @@ def bootstrap_application(
 
     router_service = RouterService(
         settings=settings,
-        ollama_manager=ollama_manager,
+        llm=ai_provider,
         skill_service=skill_service,
         tool_service=tool_service,
     )
