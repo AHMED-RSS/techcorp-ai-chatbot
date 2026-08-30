@@ -132,7 +132,7 @@ class RouterService:
             ),
         )
 
-        self.ollama = self._resolve_dependency(
+        self.ai = self._resolve_dependency(
             args,
             kwargs,
             explicit_names=(
@@ -613,13 +613,13 @@ class RouterService:
         has_documents: bool,
         model: str,
     ) -> dict[str, Any]:
-        if self.ollama is None:
+        if self.ai is None:
             raise RuntimeError(
                 "No Ollama service is configured."
             )
 
         chat_method = getattr(
-            self.ollama,
+            self.ai,
             "chat",
             None,
         )

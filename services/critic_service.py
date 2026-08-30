@@ -81,7 +81,7 @@ class CriticService:
             ),
         )
 
-        self.ollama = self._resolve_dependency(
+        self.ai = self._resolve_dependency(
             args,
             kwargs,
             explicit_names=(
@@ -345,13 +345,13 @@ class CriticService:
         system_prompt: str,
         temperature: float = 0.0,
     ) -> str:
-        if self.ollama is None:
+        if self.ai is None:
             raise CriticError(
                 "The critic service has no Ollama service."
             )
 
         chat_method = getattr(
-            self.ollama,
+            self.ai,
             "chat",
             None,
         )
