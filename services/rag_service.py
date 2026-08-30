@@ -14,7 +14,7 @@ from core.exceptions import FileProcessingError
 
 from core.logging_config import get_logger
 
-from core.ollama_client import OllamaManager
+from core.providers import AIProvider
 
 
 logger = get_logger(__name__)
@@ -317,13 +317,13 @@ class RAGService:
     def __init__(
         self,
         settings: Settings,
-        ollama_manager: OllamaManager,
+        ai_provider: AIProvider,
     ) -> None:
 
 
         self.settings = settings
 
-        self.ollama = ollama_manager
+        self.ai = ai_provider
 
 
 
@@ -464,7 +464,7 @@ class RAGService:
             )
 
             embeddings.append(
-                self.ollama.embed(
+                self.ai.embed(
                     chunk.text,
                     model=self.settings.ollama_embed_model,
                 )
@@ -644,7 +644,7 @@ class RAGService:
 
             embeddings.append(
 
-                self.ollama.embed(
+                self.ai.embed(
 
                     chunk.text,
 
@@ -775,7 +775,7 @@ class RAGService:
     ) -> list[SearchResult]:
 
 
-        embedding = self.ollama.embed(
+        embedding = self.ai.embed(
 
             query,
 
@@ -1104,3 +1104,6 @@ class RAGService:
             }
 
         
+
+
+

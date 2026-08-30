@@ -119,7 +119,7 @@ def bootstrap_application(
 
     rag_service = RAGService(
         settings=settings,
-        ollama_manager=ollama_manager,
+        ai_provider=ai_provider,
     )
 
     skill_service = SkillService(
