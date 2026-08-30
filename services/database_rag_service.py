@@ -1,4 +1,4 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 import hashlib
 
@@ -9,7 +9,9 @@ import chromadb
 from config.settings import Settings
 from core.exceptions import FileProcessingError
 from core.logging_config import get_logger
-from core.ollama_client import OllamaManager
+from core.providers import (
+    AIProvider,
+)
 from services.rag_service import (
     RAGService,
     SearchResult,
@@ -43,7 +45,8 @@ class DatabaseRAGService(RAGService):
         *,
         user_id: str,
         settings: Settings,
-        ollama_manager: OllamaManager,
+        ai_provider: AIProvider | None = None,
+        ollama_manager: AIProvider | None = None,
     ) -> None:
         cleaned_user_id = str(
             user_id or ""
@@ -55,8 +58,12 @@ class DatabaseRAGService(RAGService):
             )
 
         self.user_id = cleaned_user_id
+
+        if ai_provider is None:
+            ai_provider = ollama_manager
+
         self.settings = settings
-        self.ollama = ollama_manager
+        self.ai = ai_provider
 
         self.settings.chroma_folder.mkdir(
             parents=True,
@@ -205,7 +212,7 @@ class DatabaseRAGService(RAGService):
             )
 
             embeddings.append(
-                self.ollama.embed(
+                self.ai.embed(
                     chunk.text,
                     model=(
                         self.settings
@@ -281,7 +288,7 @@ class DatabaseRAGService(RAGService):
             }
 
         try:
-            embedding = self.ollama.embed(
+            embedding = self.ai.embed(
                 cleaned_query,
                 model=(
                     self.settings
@@ -543,3 +550,9 @@ class DatabaseRAGService(RAGService):
             "collection": self.collection_name,
             "deleted_chunks": deleted_chunks,
         }
+
+
+
+
+
+

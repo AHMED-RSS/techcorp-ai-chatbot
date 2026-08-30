@@ -275,7 +275,7 @@ try:
     rag_service = DatabaseRAGService(
         user_id=database_user.user_id,
         settings=user_runtime_settings,
-        ollama_manager=app.ollama,
+        ai_provider=app.ai,
     )
     skill_service = DatabaseSkillService(
         user_id=database_user.user_id,
@@ -298,21 +298,21 @@ try:
 
     router_service = RouterService(
         settings=user_runtime_settings,
-        ollama_manager=app.ollama,
+        ai_provider=app.ai,
         skill_service=skill_service,
         tool_service=tool_service,
     )
 
     planner_service = PlannerService(
         settings=user_runtime_settings,
-        ollama_manager=app.ollama,
+        ai_provider=app.ai,
         skill_service=skill_service,
         tool_service=tool_service,
     )
 
     executor_service = ExecutorService(
         settings=user_runtime_settings,
-        ollama_manager=app.ollama,
+        ai_provider=app.ai,
         planner_service=planner_service,
         rag_service=rag_service,
         skill_service=skill_service,
@@ -322,7 +322,7 @@ try:
     study_service = DatabaseStudyService(
         user_id=database_user.user_id,
         settings=user_runtime_settings,
-        ollama_manager=app.ollama,
+        ai_provider=app.ai,
         rag_service=rag_service,
         file_service=file_service,
     )
