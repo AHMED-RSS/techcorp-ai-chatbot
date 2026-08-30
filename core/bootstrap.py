@@ -149,7 +149,7 @@ def bootstrap_application(
 
     executor_service = ExecutorService(
         settings=settings,
-        ollama_manager=ollama_manager,
+        ai_provider=ai_provider,
         planner_service=planner_service,
         rag_service=rag_service,
         skill_service=skill_service,

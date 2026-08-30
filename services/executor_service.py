@@ -30,8 +30,8 @@ from core.exceptions import (
 from core.logging_config import (
     get_logger,
 )
-from core.ollama_client import (
-    OllamaManager,
+from core.providers import (
+    AIProvider,
 )
 from services.planner_service import (
     PlannerService,
@@ -78,14 +78,14 @@ class ExecutorService:
         self,
         *,
         settings: Settings,
-        ollama_manager: OllamaManager,
+        ai_provider: AIProvider,
         planner_service: PlannerService,
         rag_service: RAGService,
         skill_service: SkillService,
         tool_service: ToolService,
     ) -> None:
         self.settings = settings
-        self.ollama = ollama_manager
+        self.ai = ai_provider
         self.planner = planner_service
         self.rag = rag_service
         self.skills = skill_service
@@ -803,7 +803,7 @@ RULES:
             }
         )
 
-        output = self.ollama.chat(
+        output = self.ai.chat(
             messages=messages,
             model=model,
             temperature=(
@@ -1222,3 +1222,6 @@ RULES:
         ).isoformat(
             timespec="seconds"
         )
+
+
+
