@@ -1,4 +1,4 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 from datetime import datetime
 from typing import Any
@@ -12,7 +12,9 @@ from agents.study import (
 )
 from config.settings import Settings
 from core.exceptions import StudyError
-from core.ollama_client import OllamaManager
+from core.providers import (
+    AIProvider,
+)
 from database.base import utc_now
 from database.connection import (
     DatabaseSessionFactory,
@@ -41,7 +43,8 @@ class DatabaseStudyService(StudyService):
         *,
         user_id: str,
         settings: Settings,
-        ollama_manager: OllamaManager,
+        ai_provider: AIProvider | None = None,
+        ollama_manager: AIProvider | None = None,
         rag_service: RAGService,
         file_service: FileService,
         session_factory: (
@@ -61,6 +64,9 @@ class DatabaseStudyService(StudyService):
 
         self.user_id = cleaned_user_id
 
+        if ai_provider is None:
+            ai_provider = ollama_manager
+
         self.session_factory = (
             session_factory
             or get_session_factory()
@@ -68,7 +74,7 @@ class DatabaseStudyService(StudyService):
 
         super().__init__(
             settings=settings,
-            ollama_manager=ollama_manager,
+            ai_provider=ai_provider,
             rag_service=rag_service,
             file_service=file_service,
         )
@@ -423,3 +429,4 @@ class DatabaseStudyService(StudyService):
             database_session.commit()
 
             return True
+

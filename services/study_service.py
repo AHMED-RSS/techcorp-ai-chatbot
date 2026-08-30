@@ -18,7 +18,9 @@ from agents.study import (
 from config.settings import Settings
 from core.exceptions import StudyError
 from core.logging_config import get_logger
-from core.ollama_client import OllamaManager
+from core.providers import (
+    AIProvider,
+)
 from services.file_service import FileService
 from services.rag_service import (
     RAGService,
@@ -104,12 +106,12 @@ class StudyService:
         self,
         *,
         settings: Settings,
-        ollama_manager: OllamaManager,
+        ai_provider: AIProvider,
         rag_service: RAGService,
         file_service: FileService,
     ) -> None:
         self.settings = settings
-        self.ollama = ollama_manager
+        self.ai = ai_provider
         self.rag = rag_service
         self.files = file_service
 
@@ -188,7 +190,7 @@ Requirements:
 - State when a requested point is not supported by the sources.
 """.strip()
 
-        output = self.ollama.chat(
+        output = self.ai.chat(
             messages=[
                 {
                     "role": "system",
@@ -295,7 +297,7 @@ Requirements:
 - Mark unsupported requested information as unavailable.
 """.strip()
 
-        output = self.ollama.chat(
+        output = self.ai.chat(
             messages=[
                 {
                     "role": "system",
@@ -377,7 +379,7 @@ Requirements:
             results
         )
 
-        response = self.ollama.chat(
+        response = self.ai.chat(
             messages=[
                 {
                     "role": "system",
@@ -535,7 +537,7 @@ Requirements:
             results
         )
 
-        response = self.ollama.chat(
+        response = self.ai.chat(
             messages=[
                 {
                     "role": "system",
@@ -1203,3 +1205,4 @@ Requirements:
         ).isoformat(
             timespec="seconds"
         )
+

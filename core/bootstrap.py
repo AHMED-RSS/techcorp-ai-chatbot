@@ -167,7 +167,7 @@ def bootstrap_application(
 
     study_service = StudyService(
         settings=settings,
-        ollama_manager=ollama_manager,
+        ai_provider=ai_provider,
         rag_service=rag_service,
         file_service=file_service,
     )
