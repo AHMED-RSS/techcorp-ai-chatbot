@@ -12,6 +12,10 @@ from core.logging_config import (
 from core.ollama_client import (
     OllamaManager,
 )
+from core.providers import (
+    AIProvider,
+    OllamaProvider,
+)
 from services.chat_service import (
     ChatService,
 )
@@ -61,6 +65,7 @@ class ApplicationContext:
 
     settings: Settings
     ollama: OllamaManager
+    ai: AIProvider
     chats: ChatService
     files: FileService
     rag: RAGService
@@ -98,6 +103,10 @@ def bootstrap_application(
 
     ollama_manager = OllamaManager(
         settings=settings,
+    )
+
+    ai_provider = OllamaProvider(
+        ollama_manager=ollama_manager,
     )
 
     chat_service = ChatService(
@@ -170,6 +179,7 @@ def bootstrap_application(
     _CONTEXT = ApplicationContext(
         settings=settings,
         ollama=ollama_manager,
+        ai=ai_provider,
         chats=chat_service,
         files=file_service,
         rag=rag_service,
@@ -185,3 +195,6 @@ def bootstrap_application(
     )
 
     return _CONTEXT
+
+
+
