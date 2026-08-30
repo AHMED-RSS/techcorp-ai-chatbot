@@ -6,6 +6,8 @@ from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Any
 
+from core.providers import AIProvider
+
 
 VALID_EXECUTION_STATUSES = {
     "pending",
@@ -324,6 +326,7 @@ def execute_plan(
     plan: Any,
     *,
     model: str | None = None,
+    ai_provider: AIProvider | None = None,
 ) -> PlanExecutionReport:
     execution = PlanExecutionReport(
         id=f"exec_{uuid.uuid4().hex[:8]}",
@@ -355,6 +358,7 @@ def execute_plan(
                     execution.user_request
                 ),
                 model=model,
+                ai_provider=ai_provider,
             )
 
             context[
@@ -448,6 +452,7 @@ def execute_step(
     context: dict[str, Any] | None = None,
     user_request: str = "",
     model: str | None = None,
+    ai_provider: AIProvider | None = None,
 ) -> Any:
     step_type = str(
         step.step_type
@@ -459,17 +464,19 @@ def execute_step(
     if step_type == "document_search":
         from config.settings import Settings
         from core.ollama_client import OllamaManager
+        from core.providers import OllamaProvider
         from services.rag_service import RAGService
 
         settings = Settings()
 
-        ollama_manager = OllamaManager(
-            settings
-        )
+        if ai_provider is None:
+            ai_provider = OllamaProvider(
+                OllamaManager(settings)
+            )
 
         rag = RAGService(
             settings,
-            ollama_manager,
+            ai_provider,
         )
 
         results = rag.search(
@@ -506,12 +513,16 @@ def execute_step(
     }:
         from config.settings import Settings
         from core.ollama_client import OllamaManager
+        from core.providers import OllamaProvider
 
         settings = Settings()
 
-        client = OllamaManager(
-            settings
-        )
+        if ai_provider is None:
+            ai_provider = OllamaProvider(
+                OllamaManager(settings)
+            )
+
+        client = ai_provider
 
         context_text = "\n\n".join(
             str(
@@ -608,6 +619,7 @@ def run_agent_cycle(
     user_request: str,
     plan: Any,
     max_retries: int = 2,
+    ai_provider: AIProvider | None = None,
 ) -> PlanExecutionReport:
     from agents.critic import evaluate_response
 
@@ -616,7 +628,8 @@ def run_agent_cycle(
 
     while retry <= max_retries:
         execution = execute_plan(
-            plan
+            plan,
+            ai_provider=ai_provider,
         )
 
         if execution.status == "failed":
