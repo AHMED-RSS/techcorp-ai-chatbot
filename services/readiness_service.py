@@ -14,7 +14,9 @@ from typing import Any, Callable
 
 from config.settings import Settings
 from core.logging_config import get_logger
-from core.ollama_client import OllamaManager
+from core.providers import (
+    AIProvider,
+)
 
 
 logger = get_logger(__name__)
@@ -249,11 +251,11 @@ class ReadinessService:
         self,
         *,
         settings: Settings,
-        ollama_manager: OllamaManager,
+        ai_provider: AIProvider,
         rag_service: Any | None = None,
     ) -> None:
         self.settings = settings
-        self.ollama = ollama_manager
+        self.ai = ai_provider
         self.rag = rag_service
 
         self.project_root = Path(
@@ -752,7 +754,7 @@ class ReadinessService:
     ) -> ReadinessCheck:
         try:
             connected = (
-                self.ollama.health_check()
+                self.ai.health_check()
             )
 
         except Exception as exc:
@@ -805,7 +807,7 @@ class ReadinessService:
 
         try:
             models = (
-                self.ollama.list_models()
+                self.ai.list_models()
             )
 
         except Exception as exc:
@@ -1015,3 +1017,6 @@ class ReadinessService:
         ).isoformat(
             timespec="seconds"
         )
+
+
+
