@@ -4,7 +4,7 @@ Handles multimodal image understanding
 """
 
 from pathlib import Path
-import ollama
+from core.providers import AIProvider
 
 
 # Installed Ollama vision model
@@ -12,11 +12,16 @@ VISION_MODEL = "llama3.2-vision:latest"
 
 
 
-def check_vision_model():
+def check_vision_model(
+    ai_provider: AIProvider | None = None,
+):
 
     try:
 
-        models = ollama.list()
+        if ai_provider is None:
+            return False
+
+        models = ai_provider.list_models()
 
 
         available = []
@@ -71,7 +76,9 @@ def analyze_image(
 
         image_path,
 
-        question="Analyze this image"
+        question="Analyze this image",
+
+        ai_provider: AIProvider | None = None,
 
 ):
 
@@ -99,7 +106,10 @@ def analyze_image(
     try:
 
 
-        response = ollama.chat(
+        if ai_provider is None:
+            return "Vision provider is not configured."
+
+        response = ai_provider.chat(
 
             model=VISION_MODEL,
 
@@ -289,7 +299,9 @@ def compare_images(
 
         image1,
 
-        image2
+        image2,
+
+        ai_provider: AIProvider | None = None,
 
 ):
 
@@ -315,7 +327,10 @@ def compare_images(
     try:
 
 
-        response = ollama.chat(
+        if ai_provider is None:
+            return "Vision provider is not configured."
+
+        response = ai_provider.chat(
 
 
             model=VISION_MODEL,
