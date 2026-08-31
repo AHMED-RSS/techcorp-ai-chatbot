@@ -22,8 +22,6 @@ from config.settings import Settings
 from core.exceptions import (
     AgentExecutionError,
     FileProcessingError,
-    OllamaConnectionError,
-    OllamaModelError,
     SkillError,
     ToolExecutionError,
 )
@@ -1222,6 +1220,3 @@ RULES:
         ).isoformat(
             timespec="seconds"
         )
-
-
-

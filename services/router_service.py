@@ -108,7 +108,7 @@ TOOL_TERMS = (
 
 class RouterService:
     """
-    Select an agent route using deterministic rules and local Ollama.
+    Select an agent route using deterministic rules and an AI provider.
 
     Invalid model output always falls back to a usable general route
     with 50% confidence rather than returning zero confidence.
@@ -615,7 +615,7 @@ class RouterService:
     ) -> dict[str, Any]:
         if self.ai is None:
             raise RuntimeError(
-                "No Ollama service is configured."
+                "No AI provider is configured."
             )
 
         chat_method = getattr(
@@ -628,7 +628,7 @@ class RouterService:
             chat_method
         ):
             raise RuntimeError(
-                "The Ollama service has no chat method."
+                "The AI provider has no chat method."
             )
 
         system_prompt = """
