@@ -157,7 +157,7 @@ def analyze_image(
 Check that Ollama has:
 
 
-ollama list
+AI provider model list
 
 
 You should see:
