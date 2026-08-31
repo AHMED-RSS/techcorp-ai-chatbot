@@ -463,15 +463,13 @@ def execute_step(
 
     if step_type == "document_search":
         from config.settings import Settings
-        from core.ollama_client import OllamaManager
-        from core.providers import OllamaProvider
         from services.rag_service import RAGService
 
         settings = Settings()
 
         if ai_provider is None:
-            ai_provider = OllamaProvider(
-                OllamaManager(settings)
+            raise RuntimeError(
+                "AI provider is required for execution."
             )
 
         rag = RAGService(
@@ -512,14 +510,12 @@ def execute_step(
         "write",
     }:
         from config.settings import Settings
-        from core.ollama_client import OllamaManager
-        from core.providers import OllamaProvider
 
         settings = Settings()
 
         if ai_provider is None:
-            ai_provider = OllamaProvider(
-                OllamaManager(settings)
+            raise RuntimeError(
+                "AI provider is required for execution."
             )
 
         client = ai_provider
