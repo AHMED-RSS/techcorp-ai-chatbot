@@ -1,4 +1,4 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 from pathlib import Path
 from typing import Any
@@ -127,7 +127,6 @@ def study_services(
 
     dependencies = {
         "settings": settings,
-        "ollama_manager": DummyDependency(),
         "rag_service": DummyDependency(),
         "file_service": DummyDependency(),
         "session_factory": factory,

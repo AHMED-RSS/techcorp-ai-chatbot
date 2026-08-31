@@ -46,7 +46,6 @@ class DatabaseRAGService(RAGService):
         user_id: str,
         settings: Settings,
         ai_provider: AIProvider | None = None,
-        ollama_manager: AIProvider | None = None,
     ) -> None:
         cleaned_user_id = str(
             user_id or ""
@@ -59,8 +58,6 @@ class DatabaseRAGService(RAGService):
 
         self.user_id = cleaned_user_id
 
-        if ai_provider is None:
-            ai_provider = ollama_manager
 
         self.settings = settings
         self.ai = ai_provider
@@ -550,9 +547,3 @@ class DatabaseRAGService(RAGService):
             "collection": self.collection_name,
             "deleted_chunks": deleted_chunks,
         }
-
-
-
-
-
-

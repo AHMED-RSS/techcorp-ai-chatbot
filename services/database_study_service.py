@@ -44,7 +44,6 @@ class DatabaseStudyService(StudyService):
         user_id: str,
         settings: Settings,
         ai_provider: AIProvider | None = None,
-        ollama_manager: AIProvider | None = None,
         rag_service: RAGService,
         file_service: FileService,
         session_factory: (
@@ -64,8 +63,6 @@ class DatabaseStudyService(StudyService):
 
         self.user_id = cleaned_user_id
 
-        if ai_provider is None:
-            ai_provider = ollama_manager
 
         self.session_factory = (
             session_factory
@@ -429,4 +426,3 @@ class DatabaseStudyService(StudyService):
             database_session.commit()
 
             return True
-
