@@ -56,7 +56,7 @@ CRITIC_JSON_KEYS = {
 
 class CriticService:
     """
-    Review and optionally revise local Ollama responses.
+    Review and optionally revise AI provider responses.
 
     The critic's structured JSON is kept internal. Only the original
     answer or a validated natural-language revision is returned to
@@ -347,7 +347,7 @@ class CriticService:
     ) -> str:
         if self.ai is None:
             raise CriticError(
-                "The critic service has no Ollama service."
+                "The critic service has no AI provider."
             )
 
         chat_method = getattr(
@@ -360,7 +360,7 @@ class CriticService:
             chat_method
         ):
             raise CriticError(
-                "The configured Ollama service does not "
+                "The configured AI provider does not "
                 "provide a chat method."
             )
 
