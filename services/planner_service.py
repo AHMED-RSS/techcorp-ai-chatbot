@@ -94,7 +94,7 @@ class PlannerService:
     """
     Creates and stores local agent plans.
 
-    Planning uses the local Ollama model with deterministic
+    Planning uses the configured AI provider with deterministic
     fallback behaviour.
     """
 
@@ -338,7 +338,7 @@ class PlannerService:
         )
 
         parsed["status"] = "planned"
-        parsed["source"] = "ollama"
+        parsed["source"] = "ai_provider"
 
         plan = agent_plan_from_dict(
             parsed
