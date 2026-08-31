@@ -135,7 +135,7 @@ def bootstrap_application(
 
     router_service = RouterService(
         settings=settings,
-        llm=ai_provider,
+        ai_provider=ai_provider,
         skill_service=skill_service,
         tool_service=tool_service,
     )
@@ -158,7 +158,7 @@ def bootstrap_application(
 
     critic_service = CriticService(
         settings=settings,
-        llm=ai_provider,
+        ai_provider=ai_provider,
     )
 
     memory_service = MemoryService(
@@ -195,4 +195,3 @@ def bootstrap_application(
     )
 
     return _CONTEXT
-
