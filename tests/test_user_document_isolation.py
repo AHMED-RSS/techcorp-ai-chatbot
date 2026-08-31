@@ -1,4 +1,4 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 from pathlib import Path
 from typing import Any
@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy.pool import StaticPool
 
 from config.settings import get_settings
+from tests.fakes import FakeAIProvider
 from core.exceptions import (
     FileProcessingError,
     ToolExecutionError,
@@ -49,23 +50,6 @@ class TemporaryUpload:
     ) -> bytes:
         return self._content
 
-
-class FakeOllama:
-    def embed(
-        self,
-        text: str,
-        model: str | None = None,
-    ) -> list[float]:
-        length = float(
-            max(1, len(text))
-        )
-
-        return [
-            1.0,
-            length % 7 + 1.0,
-            length % 11 + 1.0,
-            length % 13 + 1.0,
-        ]
 
 
 @pytest.fixture()
@@ -263,13 +247,13 @@ def test_rag_collections_are_user_isolated(
     rag_a = DatabaseRAGService(
         user_id="auth0|user-a",
         settings=settings,
-        ollama_manager=FakeOllama(),
+        ai_provider=FakeAIProvider(),
     )
 
     rag_b = DatabaseRAGService(
         user_id="auth0|user-b",
         settings=settings,
-        ollama_manager=FakeOllama(),
+        ai_provider=FakeAIProvider(),
     )
 
     document_a = {

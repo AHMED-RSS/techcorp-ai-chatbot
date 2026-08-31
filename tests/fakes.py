@@ -3,7 +3,8 @@ from __future__ import annotations
 from collections.abc import Iterable
 from typing import Any
 
-from core.providers import AIProvider, ChatMessage
+from core.providers import AIProvider
+from core.providers.base import ChatMessage
 
 
 class FakeAIProvider(AIProvider):
