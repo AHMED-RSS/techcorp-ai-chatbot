@@ -1212,6 +1212,65 @@ div[role="dialog"]:not(
 }
 
 
+
+.tc-memory-card {
+
+    margin-top: 1rem;
+
+    padding: 1rem;
+
+    border-radius: 1rem;
+
+    background:
+        linear-gradient(
+            180deg,
+            #181823 0%,
+            #11111a 100%
+        );
+
+    border: 1px solid var(--tc-border);
+}
+
+
+.tc-memory-body {
+
+    margin-top: 0.75rem;
+
+}
+
+
+.tc-memory-row {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    padding: 0.45rem 0;
+
+    border-bottom:
+        1px solid var(--tc-border);
+
+    color: var(--tc-text-soft);
+
+}
+
+
+.tc-memory-row:last-child {
+
+    border-bottom: none;
+
+}
+
+
+.tc-memory-row strong {
+
+    color: var(--tc-text);
+
+}
+
+
 .tc-card {
     padding:1rem;
 

@@ -459,6 +459,38 @@ def render_memory_workspace(
         "only in the local project."
     )
 
+    all_memories = (
+        memory_service
+        .list_memories(
+            include_disabled=True,
+            limit=500,
+        )
+    )
+
+    task_states = (
+        memory_service
+        .list_task_states(
+            limit=100,
+        )
+    )
+
+    render_context_memory(
+        memories=len(all_memories),
+        tasks=len(task_states),
+        persistent=bool(
+            st.session_state.get(
+                "persistent_memory_enabled",
+                True,
+            )
+        ),
+        chat_memory=bool(
+            st.session_state.get(
+                "chat_memory_enabled",
+                True,
+            )
+        ),
+    )
+
     memory_tab, task_tab, create_tab = st.tabs(
         [
             "Memories",

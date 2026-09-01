@@ -490,6 +490,69 @@ def render_source_panel(
 
 
 
+def render_context_memory(
+    memories: int,
+    tasks: int,
+    persistent: bool,
+    chat_memory: bool,
+) -> None:
+
+    rows = [
+        (
+            "Stored Memories",
+            str(memories),
+        ),
+        (
+            "Task States",
+            str(tasks),
+        ),
+        (
+            "Persistent Memory",
+            "Enabled"
+            if persistent
+            else "Off",
+        ),
+        (
+            "Chat Memory",
+            "Enabled"
+            if chat_memory
+            else "Off",
+        ),
+    ]
+
+
+    html = """
+    <div class="tc-memory-card">
+
+        <div class="tc-card-title">
+            Context Memory
+        </div>
+
+        <div class="tc-memory-body">
+    """
+
+
+    for label, value in rows:
+        html += f"""
+        <div class="tc-memory-row">
+            <span>{escape(label)}</span>
+            <strong>{escape(value)}</strong>
+        </div>
+        """
+
+
+    html += """
+        </div>
+
+    </div>
+    """
+
+
+    render_html(html)
+
+
+
+
 def render_learning_workspace(
     title: str,
     study_type: str,
