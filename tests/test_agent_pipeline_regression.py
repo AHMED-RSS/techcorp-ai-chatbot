@@ -29,6 +29,7 @@ def test_router_to_planner_pipeline_uses_ai_provider(
         file_service=None,
         rag_service=None,
         skill_service=skill_service,
+        ai_provider=provider,
     )
 
     router = RouterService(

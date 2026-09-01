@@ -11,6 +11,7 @@ from typing import Any
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from config.settings import Settings
+from core.providers import AIProvider
 from core.exceptions import (
     FileProcessingError,
     ToolExecutionError,
@@ -19,6 +20,11 @@ from services.file_service import FileService
 from services.rag_service import RAGService
 from services.skill_service import SkillService
 from services.tool_service import ToolService
+from services.vision_service import (
+    analyze_chart,
+    analyze_image,
+    compare_images,
+)
 from tools.tool_models import (
     ToolDefinition,
     ToolResult,
@@ -379,6 +385,7 @@ def build_local_tool_service(
     file_service: FileService,
     rag_service: RAGService,
     skill_service: SkillService,
+    ai_provider: AIProvider,
 ) -> ToolService:
     service = ToolService(
         settings=settings
@@ -1099,6 +1106,226 @@ def build_local_tool_service(
             },
             handler=save_report_tool,
             requires_confirmation=False,
+        )
+    )
+
+
+    def resolve_image_argument(
+        arguments: dict[str, Any],
+        key: str,
+    ) -> Path:
+        requested_path = str(
+            arguments.get(
+                key,
+                "",
+            )
+        ).strip()
+
+        if not requested_path:
+            raise ToolExecutionError(
+                f"Image path '{key}' is required."
+            )
+
+        path = resolve_safe_path(
+            settings,
+            requested_path,
+            file_service=file_service,
+        )
+
+        if not path.exists():
+            raise ToolExecutionError(
+                f"Image does not exist: {requested_path}"
+            )
+
+        if not path.is_file():
+            raise ToolExecutionError(
+                f"Image path is not a file: {requested_path}"
+            )
+
+        supported_extensions = {
+            ".png",
+            ".jpg",
+            ".jpeg",
+            ".webp",
+            ".bmp",
+            ".gif",
+        }
+
+        if path.suffix.lower() not in supported_extensions:
+            raise ToolExecutionError(
+                "Unsupported image format. "
+                "Supported formats: PNG, JPG, JPEG, WEBP, BMP, GIF."
+            )
+
+        return path
+
+    def image_analysis_tool(
+        arguments: dict[str, Any],
+    ) -> ToolResult:
+        path = resolve_image_argument(
+            arguments,
+            "path",
+        )
+
+        question = str(
+            arguments.get(
+                "question",
+                "Analyze this image",
+            )
+        ).strip()
+
+        if not question:
+            question = "Analyze this image"
+
+        result = analyze_image(
+            path,
+            question,
+            ai_provider=ai_provider,
+        )
+
+        return ToolResult(
+            success=True,
+            tool_name="image_analysis",
+            content=str(result),
+            data={
+                "path": str(path),
+                "question": question,
+            },
+        )
+
+    service.register(
+        ToolDefinition(
+            name="image_analysis",
+            description=(
+                "Analyze a local image using the configured "
+                "multimodal AI provider."
+            ),
+            category="vision",
+            parameters={
+                "type": "object",
+                "properties": {
+                    "path": {
+                        "type": "string",
+                        "description": (
+                            "Image path relative to the project root."
+                        ),
+                    },
+                    "question": {
+                        "type": "string",
+                        "description": (
+                            "Optional question about the image."
+                        ),
+                    },
+                },
+                "required": [
+                    "path",
+                ],
+            },
+            handler=image_analysis_tool,
+        )
+    )
+
+    def chart_analysis_tool(
+        arguments: dict[str, Any],
+    ) -> ToolResult:
+        path = resolve_image_argument(
+            arguments,
+            "path",
+        )
+
+        result = analyze_chart(
+            path,
+            ai_provider=ai_provider,
+        )
+
+        return ToolResult(
+            success=True,
+            tool_name="chart_analysis",
+            content=str(result),
+            data={
+                "path": str(path),
+            },
+        )
+
+    service.register(
+        ToolDefinition(
+            name="chart_analysis",
+            description=(
+                "Analyze a chart, graph, or plotted image using "
+                "the configured multimodal AI provider."
+            ),
+            category="vision",
+            parameters={
+                "type": "object",
+                "properties": {
+                    "path": {
+                        "type": "string",
+                        "description": (
+                            "Chart image path relative to the project root."
+                        ),
+                    },
+                },
+                "required": [
+                    "path",
+                ],
+            },
+            handler=chart_analysis_tool,
+        )
+    )
+
+    def image_compare_tool(
+        arguments: dict[str, Any],
+    ) -> ToolResult:
+        image1 = resolve_image_argument(
+            arguments,
+            "image1",
+        )
+
+        image2 = resolve_image_argument(
+            arguments,
+            "image2",
+        )
+
+        result = compare_images(
+            image1,
+            image2,
+            ai_provider=ai_provider,
+        )
+
+        return ToolResult(
+            success=True,
+            tool_name="image_compare",
+            content=str(result),
+            data={
+                "image1": str(image1),
+                "image2": str(image2),
+            },
+        )
+
+    service.register(
+        ToolDefinition(
+            name="image_compare",
+            description=(
+                "Compare two local images and explain their "
+                "similarities, differences, and important changes."
+            ),
+            category="vision",
+            parameters={
+                "type": "object",
+                "properties": {
+                    "image1": {
+                        "type": "string",
+                    },
+                    "image2": {
+                        "type": "string",
+                    },
+                },
+                "required": [
+                    "image1",
+                    "image2",
+                ],
+            },
+            handler=image_compare_tool,
         )
     )
 

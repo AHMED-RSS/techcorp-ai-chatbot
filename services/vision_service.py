@@ -23,39 +23,10 @@ def check_vision_model(
 
         models = ai_provider.list_models()
 
-
-        available = []
-
-
-        # New Ollama format
-
-        if hasattr(models, "models"):
-
-            for model in models.models:
-
-                available.append(
-                    model.model
-                    if hasattr(model, "model")
-                    else str(model)
-                )
-
-
-        # Dictionary fallback
-
-        elif isinstance(models, dict):
-
-            available = [
-
-                m.get("name")
-
-                for m in models.get(
-                    "models",
-                    []
-                )
-
-            ]
-
-
+        available = {
+            str(model).strip()
+            for model in models
+        }
 
         return VISION_MODEL in available
 
@@ -138,7 +109,7 @@ def analyze_image(
 
 
 
-        return response["message"]["content"]
+        return response
 
 
 
@@ -176,7 +147,7 @@ You should see:
 
 
 
-def analyze_chart(image_path):
+def analyze_chart(image_path, ai_provider: AIProvider | None = None):
 
 
     prompt = """
@@ -235,8 +206,8 @@ If information is unclear, say so.
 
         image_path,
 
-        prompt
-
+        prompt,
+        ai_provider=ai_provider
     )
 
 
@@ -247,7 +218,7 @@ If information is unclear, say so.
 
 
 
-def analyze_document_image(image_path):
+def analyze_document_image(image_path, ai_provider: AIProvider | None = None):
 
 
     prompt = """
@@ -283,8 +254,8 @@ Keep the structure clear.
 
         image_path,
 
-        prompt
-
+        prompt,
+        ai_provider=ai_provider
     )
 
 
@@ -383,7 +354,7 @@ Explain:
 
 
 
-        return response["message"]["content"]
+        return response
 
 
 
@@ -402,7 +373,7 @@ Explain:
 
 
 
-def describe_image(image_path):
+def describe_image(image_path, ai_provider: AIProvider | None = None):
 
 
     prompt = """
@@ -433,6 +404,6 @@ Include:
 
         image_path,
 
-        prompt
-
+        prompt,
+        ai_provider=ai_provider
     )

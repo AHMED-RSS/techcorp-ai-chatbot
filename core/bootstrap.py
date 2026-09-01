@@ -131,6 +131,7 @@ def bootstrap_application(
         file_service=file_service,
         rag_service=rag_service,
         skill_service=skill_service,
+        ai_provider=ai_provider,
     )
 
     router_service = RouterService(
