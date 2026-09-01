@@ -839,6 +839,63 @@ div[role="dialog"]:not(
    CHAT EXPERIENCE
    ========================================================== */
 
+
+.tc-response-card {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 0.85rem;
+
+}
+
+
+.tc-response-section {
+
+    padding: 0.85rem;
+
+    border-radius: 0.85rem;
+
+    border: 1px solid var(--tc-border);
+
+    background:
+        linear-gradient(
+            180deg,
+            rgba(255,255,255,0.04),
+            rgba(255,255,255,0.02)
+        );
+
+}
+
+
+.tc-response-title {
+
+    font-weight: 700;
+
+    font-size: 0.95rem;
+
+    margin-bottom: 0.45rem;
+
+    color: var(--tc-text);
+
+}
+
+
+.tc-response-text {
+
+    white-space: pre-wrap;
+
+    line-height: 1.6;
+
+    color: var(--tc-text-soft);
+
+    font-size: 0.92rem;
+
+}
+
+
+
 .tc-message {
     width: 100%;
     margin: 0.75rem 0;

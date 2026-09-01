@@ -248,6 +248,63 @@ def render_information_card(
         """
     )
 
+def _split_response_sections(
+    content: str,
+) -> list[tuple[str, str]]:
+    sections: list[tuple[str, str]] = []
+
+    current_title = "Overview"
+    current_body: list[str] = []
+
+    for line in content.splitlines():
+        clean = line.strip()
+
+        is_heading = (
+            clean.startswith("##")
+            or (
+                len(clean) > 2
+                and clean[0].isdigit()
+                and clean[1] == "."
+            )
+            or (
+                clean.startswith("**")
+                and clean.endswith("**")
+            )
+        )
+
+        if is_heading:
+            if current_body:
+                sections.append(
+                    (
+                        current_title,
+                        "\n".join(current_body).strip(),
+                    )
+                )
+
+            current_title = (
+                clean
+                .replace("#", "")
+                .replace("*", "")
+                .strip()
+            )
+
+            current_body = []
+
+        else:
+            current_body.append(line)
+
+    if current_body:
+        sections.append(
+            (
+                current_title,
+                "\n".join(current_body).strip(),
+            )
+        )
+
+    return sections
+
+
+
 def render_chat_message(
     role: str,
     content: str,
@@ -264,12 +321,54 @@ def render_chat_message(
         else "tc-message-assistant"
     )
 
+    if role.lower() == "assistant":
+        sections = _split_response_sections(
+            content
+        )
+
+        body = ""
+
+        render_html(
+            f"""
+            <div class="tc-message {role_class}">
+                <div class="tc-message-header">
+                    {escape(safe_role)}
+                </div>
+
+                <div class="tc-response-card">
+            """
+        )
+
+
+        for title, section_text in sections:
+
+            st.markdown(
+                f"""
+### {title}
+
+{section_text}
+
+---
+                """
+            )
+
+
+        render_html(
+            """
+                </div>
+            </div>
+            """
+        )
+
+        return
+
     render_html(
         f"""
         <div class="tc-message {role_class}">
             <div class="tc-message-header">
                 {escape(safe_role)}
             </div>
+
             <div class="tc-message-body">
                 {escape(content)}
             </div>
