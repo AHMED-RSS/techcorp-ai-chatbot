@@ -120,6 +120,7 @@ from ui.components import (
     render_card,
     render_result_summary_card,
     render_source_panel,
+    render_activity_panel,
 )
 from ui.critic_panel import (
     render_critic_report,
@@ -2601,9 +2602,8 @@ if workspace == "chat":
         )
 
     if st.session_state.agent_running:
-        st.info(
-            f"Agent status: "
-            f"{st.session_state.agent_status}"
+        render_activity_panel(
+            st.session_state.agent_status
         )
 
         if st.button(

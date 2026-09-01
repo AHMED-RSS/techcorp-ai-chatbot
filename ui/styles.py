@@ -1091,6 +1091,69 @@ div[role="dialog"]:not(
 }
 
 
+
+.tc-activity-panel {
+    margin-top: 1rem;
+
+    padding: 1rem;
+
+    border-radius: 1rem;
+
+    background:
+        linear-gradient(
+            180deg,
+            #181823 0%,
+            #11111a 100%
+        );
+
+    border: 1px solid var(--tc-border);
+}
+
+
+.tc-activity-item {
+    display: flex;
+
+    align-items: center;
+
+    gap: 0.65rem;
+
+    margin-top: 0.75rem;
+
+    color: var(--tc-text-soft);
+
+    font-size: 0.9rem;
+}
+
+
+.tc-activity-dot {
+    width: 0.65rem;
+
+    height: 0.65rem;
+
+    border-radius: 50%;
+
+    background: var(--tc-muted);
+}
+
+
+.tc-active {
+    background: #5b8cff;
+
+    box-shadow:
+        0 0 12px rgba(91,140,255,0.7);
+}
+
+
+.tc-success {
+    background: #22c55e;
+}
+
+
+.tc-error {
+    background: #ef4444;
+}
+
+
 .tc-card {
     padding:1rem;
 

@@ -324,6 +324,83 @@ def render_agent_timeline(
     )
 
 
+def render_activity_panel(
+    status: str,
+) -> None:
+
+    labels = {
+        "preparing": (
+            "Preparing request",
+            "active",
+        ),
+        "searching_web": (
+            "Searching web",
+            "active",
+        ),
+        "routing": (
+            "Selecting route",
+            "active",
+        ),
+        "planning": (
+            "Creating plan",
+            "active",
+        ),
+        "executing": (
+            "Executing tools",
+            "active",
+        ),
+        "generating": (
+            "Generating response",
+            "active",
+        ),
+        "reviewing": (
+            "Quality review",
+            "active",
+        ),
+        "completed": (
+            "Completed",
+            "success",
+        ),
+        "failed": (
+            "Failed",
+            "error",
+        ),
+    }
+
+
+    title, state = labels.get(
+        status,
+        (
+            status.title(),
+            "info",
+        ),
+    )
+
+
+    render_html(
+        f"""
+        <div class="tc-activity-panel">
+
+            <div class="tc-card-title">
+                AI Activity
+            </div>
+
+            <div class="tc-activity-item">
+                <span class="tc-activity-dot tc-{state}">
+                </span>
+
+                <span>
+                    {escape(title)}
+                </span>
+            </div>
+
+        </div>
+        """
+    )
+
+
+
+
 def render_source_panel(
     document_sources: list[dict],
     web_sources: list[dict],
