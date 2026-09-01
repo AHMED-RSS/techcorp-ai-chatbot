@@ -122,7 +122,9 @@ from ui.components import (
     render_response_intelligence,
     render_source_panel,
     render_activity_panel,
+    render_ai_workspace_dashboard,
 )
+
 from ui.critic_panel import (
     render_critic_report,
     render_critic_sidebar,
@@ -2330,6 +2332,48 @@ render_current_workspace(
     workspace=workspace,
     settings=settings,
 )
+
+
+if workspace == "chat":
+
+    render_ai_workspace_dashboard(
+        agent_status=str(
+            st.session_state.get(
+                "agent_status",
+                "idle",
+            )
+        ),
+        model_name=str(
+            st.session_state.get(
+                "model_name",
+                "Ollama",
+            )
+        ),
+        reasoning_mode=str(
+            st.session_state.get(
+                "reasoning_mode",
+                "normal",
+            )
+        ),
+        documents=len(
+            st.session_state.get(
+                "active_documents",
+                [],
+            )
+        ),
+        sources=len(
+            st.session_state.get(
+                "last_web_results",
+                [],
+            )
+        ),
+        memories=len(
+            st.session_state.get(
+                "memories",
+                [],
+            )
+        ),
+    )
 
 
 for error_key in (

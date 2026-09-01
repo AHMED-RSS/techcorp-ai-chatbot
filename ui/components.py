@@ -490,6 +490,64 @@ def render_source_panel(
 
 
 
+def render_ai_workspace_dashboard(
+    agent_status: str,
+    model_name: str,
+    reasoning_mode: str,
+    documents: int,
+    sources: int,
+    memories: int,
+) -> None:
+
+    cards = [
+        (
+            "Agent",
+            f"{agent_status.title()} · {model_name}",
+        ),
+        (
+            "Reasoning",
+            reasoning_mode.title(),
+        ),
+        (
+            "Knowledge",
+            f"{documents} Documents · {sources} Sources",
+        ),
+        (
+            "Memory",
+            f"{memories} Stored",
+        ),
+    ]
+
+
+    html = """
+    <div class="tc-dashboard-grid">
+    """
+
+
+    for title, value in cards:
+        html += f"""
+        <div class="tc-dashboard-card">
+            <div class="tc-dashboard-title">
+                {escape(title)}
+            </div>
+
+            <div class="tc-dashboard-value">
+                {escape(value)}
+            </div>
+        </div>
+        """
+
+
+    html += """
+    </div>
+    """
+
+
+    render_html(html)
+
+
+
+
 def render_context_memory(
     memories: int,
     tasks: int,

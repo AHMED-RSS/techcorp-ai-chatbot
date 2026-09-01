@@ -1271,6 +1271,80 @@ div[role="dialog"]:not(
 }
 
 
+
+
+.tc-dashboard-grid {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(
+            4,
+            minmax(0, 1fr)
+        );
+
+    gap: 0.75rem;
+
+    margin-bottom: 1rem;
+
+}
+
+
+.tc-dashboard-card {
+
+    padding: 1rem;
+
+    border-radius: 1rem;
+
+    border: 1px solid var(--tc-border);
+
+    background:
+        linear-gradient(
+            180deg,
+            #181823 0%,
+            #11111a 100%
+        );
+
+}
+
+
+.tc-dashboard-title {
+
+    font-size: 0.8rem;
+
+    color: var(--tc-text-soft);
+
+    margin-bottom: 0.35rem;
+
+}
+
+
+.tc-dashboard-value {
+
+    font-size: 0.95rem;
+
+    font-weight: 700;
+
+    color: var(--tc-text);
+
+}
+
+
+@media (max-width: 900px) {
+
+    .tc-dashboard-grid {
+
+        grid-template-columns:
+            repeat(
+                2,
+                minmax(0, 1fr)
+            );
+
+    }
+
+}
+
+
 .tc-card {
     padding:1rem;
 
