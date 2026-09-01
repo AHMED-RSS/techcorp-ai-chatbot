@@ -324,6 +324,54 @@ def render_agent_timeline(
     )
 
 
+def render_result_summary_card(
+    route: str | None = None,
+    confidence: str | None = None,
+    quality: str | None = None,
+) -> None:
+    rows = ""
+
+    if route:
+        rows += f"""
+        <div class="tc-result-row">
+            <span>Route</span>
+            <strong>{escape(route)}</strong>
+        </div>
+        """
+
+    if confidence:
+        rows += f"""
+        <div class="tc-result-row">
+            <span>Confidence</span>
+            <strong>{escape(confidence)}</strong>
+        </div>
+        """
+
+    if quality:
+        rows += f"""
+        <div class="tc-result-row">
+            <span>Quality</span>
+            <strong>{escape(quality)}</strong>
+        </div>
+        """
+
+    render_html(
+        f"""
+        <div class="tc-result-card">
+            <div class="tc-card-title">
+                Agent Result
+            </div>
+
+            <div class="tc-result-body">
+                {rows}
+            </div>
+        </div>
+        """
+    )
+
+
+
+
 def render_card(
     title: str,
     body: str,

@@ -118,6 +118,7 @@ from ui.components import (
     render_chat_message,
     render_agent_timeline,
     render_card,
+    render_result_summary_card,
 )
 from ui.critic_panel import (
     render_critic_report,
@@ -2543,11 +2544,13 @@ if workspace == "chat":
                 ):
                     confidence_value = 0.5
 
-                st.caption(
-                    "Route: "
-                    f"{route_data.get('route', 'general').title()} | "
-                    f"{confidence_value:.0%}"
-                )
+                route_name = str(
+                    route_data.get(
+                        "route",
+                        "general",
+                    )
+                ).title()
+
 
             critic_data = metadata.get(
                 "critic"
@@ -2573,9 +2576,10 @@ if workspace == "chat":
                 ):
                     score_value = 0.0
 
-                st.caption(
-                    "Quality score: "
-                    f"{score_value:.0%}"
+                render_result_summary_card(
+                    route=route_name,
+                    confidence=f"{confidence_value:.0%}",
+                    quality=f"{score_value:.0%}",
                 )
 
             render_document_sources(

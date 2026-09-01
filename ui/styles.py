@@ -985,6 +985,51 @@ div[role="dialog"]:not(
    CARDS
    ========================================================== */
 
+
+.tc-result-card {
+    margin-top: 0.75rem;
+
+    padding: 1rem;
+
+    border-radius: 1rem;
+
+    background:
+        linear-gradient(
+            180deg,
+            #1b1b25 0%,
+            #14141c 100%
+        );
+
+    border: 1px solid var(--tc-border);
+}
+
+
+.tc-result-body {
+    display: flex;
+    flex-direction: column;
+
+    gap: 0.55rem;
+
+    margin-top: 0.75rem;
+}
+
+
+.tc-result-row {
+    display: flex;
+
+    justify-content: space-between;
+
+    color: var(--tc-text-soft);
+
+    font-size: 0.9rem;
+}
+
+
+.tc-result-row strong {
+    color: var(--tc-text);
+}
+
+
 .tc-card {
     padding:1rem;
 
