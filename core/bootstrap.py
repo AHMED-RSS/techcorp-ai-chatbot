@@ -16,6 +16,9 @@ from core.providers import (
     AIProvider,
     OllamaProvider,
 )
+from services.chatbot_service import (
+    ChatbotService,
+)
 from services.chat_service import (
     ChatService,
 )
@@ -67,6 +70,7 @@ class ApplicationContext:
     ollama: OllamaManager
     ai: AIProvider
     chats: ChatService
+    chatbot: ChatbotService
     files: FileService
     rag: RAGService
     skills: SkillService
@@ -157,6 +161,13 @@ def bootstrap_application(
         tool_service=tool_service,
     )
 
+    chatbot_service = ChatbotService(
+        chat_service=chat_service,
+        router_service=router_service,
+        planner_service=planner_service,
+        executor_service=executor_service,
+    )
+
     critic_service = CriticService(
         settings=settings,
         ai_provider=ai_provider,
@@ -182,6 +193,7 @@ def bootstrap_application(
         ollama=ollama_manager,
         ai=ai_provider,
         chats=chat_service,
+        chatbot=chatbot_service,
         files=file_service,
         rag=rag_service,
         skills=skill_service,
