@@ -119,6 +119,7 @@ from ui.components import (
     render_agent_timeline,
     render_card,
     render_result_summary_card,
+    render_source_panel,
 )
 from ui.critic_panel import (
     render_critic_report,
@@ -2582,18 +2583,15 @@ if workspace == "chat":
                     quality=f"{score_value:.0%}",
                 )
 
-            render_document_sources(
+            render_source_panel(
                 metadata.get(
                     "document_sources",
                     [],
-                )
-            )
-
-            render_web_sources(
+                ),
                 metadata.get(
                     "web_results",
                     [],
-                )
+                ),
             )
 
     if not st.session_state.ollama_connected:

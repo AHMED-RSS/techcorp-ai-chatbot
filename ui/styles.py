@@ -1030,6 +1030,67 @@ div[role="dialog"]:not(
 }
 
 
+
+.tc-source-panel {
+    margin-top: 1rem;
+
+    padding: 1rem;
+
+    border-radius: 1rem;
+
+    background:
+        linear-gradient(
+            180deg,
+            #181823 0%,
+            #11111a 100%
+        );
+
+    border: 1px solid var(--tc-border);
+}
+
+
+.tc-source-section {
+    margin-top: 0.85rem;
+}
+
+
+.tc-source-label {
+    margin-bottom: 0.45rem;
+
+    font-size: 0.85rem;
+
+    font-weight: 700;
+
+    color: var(--tc-text-soft);
+}
+
+
+.tc-source-item {
+    display: flex;
+
+    justify-content: space-between;
+
+    gap: 1rem;
+
+    padding: 0.55rem 0;
+
+    border-bottom:
+        1px solid var(--tc-border);
+
+    font-size: 0.9rem;
+}
+
+
+.tc-source-item:last-child {
+    border-bottom: none;
+}
+
+
+.tc-source-item span {
+    color: var(--tc-muted);
+}
+
+
 .tc-card {
     padding:1rem;
 

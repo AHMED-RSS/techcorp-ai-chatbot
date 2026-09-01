@@ -324,6 +324,95 @@ def render_agent_timeline(
     )
 
 
+def render_source_panel(
+    document_sources: list[dict],
+    web_sources: list[dict],
+) -> None:
+
+    if not document_sources and not web_sources:
+        return
+
+    html = """
+    <div class="tc-source-panel">
+
+        <div class="tc-card-title">
+            Sources Used
+        </div>
+    """
+
+    if document_sources:
+        html += """
+        <div class="tc-source-section">
+            <div class="tc-source-label">
+                Documents
+            </div>
+        """
+
+        for source in document_sources[:5]:
+            title = str(
+                source.get(
+                    "document_title",
+                    "Untitled",
+                )
+            )
+
+            score = source.get(
+                "relevance_score"
+            )
+
+            relevance = (
+                f"{float(score):.0%}"
+                if score is not None
+                else "N/A"
+            )
+
+            html += f"""
+            <div class="tc-source-item">
+                <strong>{escape(title)}</strong>
+                <span>
+                    Relevance {escape(relevance)}
+                </span>
+            </div>
+            """
+
+        html += "</div>"
+
+
+    if web_sources:
+        html += """
+        <div class="tc-source-section">
+            <div class="tc-source-label">
+                Web Sources
+            </div>
+        """
+
+        for source in web_sources[:5]:
+            title = str(
+                source.get(
+                    "title",
+                    "Untitled result",
+                )
+            )
+
+            html += f"""
+            <div class="tc-source-item">
+                <strong>{escape(title)}</strong>
+                <span>
+                    Verified web result
+                </span>
+            </div>
+            """
+
+        html += "</div>"
+
+
+    html += "</div>"
+
+    render_html(html)
+
+
+
+
 def render_result_summary_card(
     route: str | None = None,
     confidence: str | None = None,
