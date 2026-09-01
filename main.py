@@ -1,4 +1,4 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 import base64
 import json
@@ -164,7 +164,7 @@ from ui.tool_panel import (
 
 st.set_page_config(
     page_title="TechCorp AI",
-    page_icon="Ã¢â€”â€°",
+    page_icon="*",
     layout="wide",
     initial_sidebar_state="expanded",
 )
@@ -297,10 +297,11 @@ try:
     )
 
     tool_service = build_local_tool_service(
-        settings=user_runtime_settings,
-        file_service=file_service,
-        rag_service=rag_service,
-        skill_service=skill_service,
+    settings=user_runtime_settings,
+    ai_provider=app.ai,
+    file_service=file_service,
+    rag_service=rag_service,
+    skill_service=skill_service,
     )
 
     router_service = RouterService(
@@ -921,7 +922,7 @@ def render_document_sources(
             )
 
             st.caption(
-                f"{source.get('original_name', '')} Ã‚Â· "
+                f"{source.get('original_name', '')} | "
                 + (
                     f"Relevance {float(score):.0%}"
                     if score is not None
@@ -939,7 +940,7 @@ def render_document_sources(
             st.write(
                 text[:900]
                 + (
-                    "Ã¢â‚¬Â¦"
+                    "..."
                     if len(text) > 900
                     else ""
                 )
@@ -2307,7 +2308,7 @@ with st.sidebar:
     )
 
     if st.button(
-        "Ã¢â€ Â» Refresh local status",
+        "> Refresh local status",
         use_container_width=True,
         key="refresh_local_status",
     ):
@@ -2466,7 +2467,7 @@ if workspace == "chat":
 
             if attachments:
                 st.caption(
-                    f"Ã°Å¸â€œÅ½ {len(attachments)} attachment(s)"
+                    f"[file] {len(attachments)} attachment(s)"
                 )
 
             metadata = message.get(
@@ -2513,7 +2514,7 @@ if workspace == "chat":
 
                 st.caption(
                     "Composer: "
-                    + " Ã‚Â· ".join(
+                    + " | ".join(
                         labels
                     )
                 )
@@ -2544,7 +2545,7 @@ if workspace == "chat":
 
                 st.caption(
                     "Route: "
-                    f"{route_data.get('route', 'general').title()} Ã‚Â· "
+                    f"{route_data.get('route', 'general').title()} | "
                     f"{confidence_value:.0%}"
                 )
 
