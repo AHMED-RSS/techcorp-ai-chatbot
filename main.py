@@ -2374,7 +2374,7 @@ if workspace == "chat":
                 "status": (
                     "active"
                     if st.session_state.agent_status == "routing"
-                    else "done"
+                    else "completed"
                 ),
             },
             {

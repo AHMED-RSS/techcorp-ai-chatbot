@@ -120,7 +120,7 @@ def render_badge_row(
         <span class="tc-badge tc-badge-{status}">
             <span class="tc-badge-dot"></span>
             <span>{escape(text)}</span>
-        </span>
+        </span>&nbsp;
         """
 
     html += """
@@ -294,15 +294,23 @@ def render_agent_timeline(
             "Step",
         )
 
-        active = (
-            "tc-agent-step-active"
+        status_class = (
+            f"tc-agent-step-{status}"
+        )
+
+        icon = (
+            "✓"
+            if status == "completed"
+            else "●"
             if status == "active"
-            else ""
+            else "○"
         )
 
         items += f"""
-        <div class="tc-agent-step {active}">
-            <span class="tc-agent-step-dot"></span>
+        <div class="tc-agent-step {status_class}">
+            <span class="tc-agent-step-dot">
+                {icon}
+            </span>
             <span>{escape(title)}</span>
         </div>
         """

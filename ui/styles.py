@@ -925,6 +925,51 @@ div[role="dialog"]:not(
 }
 
 
+.tc-agent-step {
+    transition: all 0.2s ease;
+}
+
+.tc-agent-step-completed {
+    color: var(--tc-text);
+}
+
+.tc-agent-step-completed .tc-agent-step-dot {
+    background: #22c55e;
+    color: white;
+
+    box-shadow:
+        0 0 12px rgba(34, 197, 94, 0.45);
+}
+
+.tc-agent-step-active {
+    color: white;
+
+    font-weight: 700;
+}
+
+.tc-agent-step-active .tc-agent-step-dot {
+    background:
+        var(--tc-accent-a);
+
+    color: white;
+
+    box-shadow:
+        0 0 14px rgba(168, 85, 247, 0.65);
+}
+
+.tc-agent-step-pending {
+    color: var(--tc-muted);
+}
+
+.tc-agent-step-pending .tc-agent-step-dot {
+    background:
+        rgba(255,255,255,0.12);
+
+    color:
+        var(--tc-muted);
+}
+
+
 .tc-agent-step-active
 .tc-agent-step-dot {
     background:
