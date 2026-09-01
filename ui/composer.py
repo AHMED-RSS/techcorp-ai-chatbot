@@ -4,6 +4,10 @@ from typing import Any
 
 import streamlit as st
 
+from ui.components import (
+    render_badge_row,
+)
+
 from agents.composer import (
     ComposerAttachment,
     ComposerSubmission,
@@ -556,11 +560,36 @@ def render_prompt_composer(
             )
         )
 
-        st.caption(
-            "Attachments: "
-            f"{attachments_count} | "
-            "Reasoning: "
-            f"{reasoning_mode.title()}"
+        render_badge_row(
+            [
+                (
+                    reasoning_mode.title(),
+                    "info",
+                ),
+                (
+                    "Documents",
+                    "success",
+                ),
+                (
+                    (
+                        "Web On"
+                        if st.session_state.get(
+                            "web_search_enabled",
+                            False,
+                        )
+                        else "Web Off"
+                    ),
+                    "info",
+                ),
+                (
+                    f"{attachments_count} Files",
+                    (
+                        "warning"
+                        if attachments_count
+                        else "info"
+                    ),
+                ),
+            ]
         )
 
         _render_add_prompt_menu(

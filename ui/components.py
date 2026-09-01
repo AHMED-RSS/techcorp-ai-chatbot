@@ -108,6 +108,28 @@ def render_badge(
     )
 
 
+def render_badge_row(
+    badges: list[tuple[str, BadgeStatus]],
+) -> None:
+    html = """
+    <div class="tc-badge-row">
+    """
+
+    for text, status in badges:
+        html += f"""
+        <span class="tc-badge tc-badge-{status}">
+            <span class="tc-badge-dot"></span>
+            <span>{escape(text)}</span>
+        </span>
+        """
+
+    html += """
+    </div>
+    """
+
+    render_html(html)
+
+
 def render_agent_panel(
     agent_name: str,
     model_name: str,

@@ -1,4 +1,4 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 import streamlit as st
 
@@ -334,6 +334,68 @@ section[data-testid="stSidebar"]
     color: var(--tc-muted);
     font-size: 0.78rem;
     line-height: 1.5;
+}
+
+
+/* ==========================================================
+   BADGES
+   ========================================================== */
+
+.tc-badge-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.35rem;
+    margin-bottom: 0.45rem;
+}
+
+
+.tc-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+
+    padding: 0.35rem 0.75rem;
+    margin-right: 0.35rem;
+    margin-bottom: 0.35rem;
+
+    border-radius: 999px;
+
+    border: 1px solid var(--tc-border);
+
+    background: rgba(255, 255, 255, 0.05);
+
+    color: var(--tc-text-soft);
+
+    font-size: 0.82rem;
+    font-weight: 600;
+
+    line-height: 1;
+}
+
+.tc-badge-dot {
+    width: 0.45rem;
+    height: 0.45rem;
+
+    border-radius: 50%;
+
+    background: var(--tc-muted);
+}
+
+.tc-badge-success .tc-badge-dot {
+    background: #22c55e;
+}
+
+.tc-badge-warning .tc-badge-dot {
+    background: #f59e0b;
+}
+
+.tc-badge-error .tc-badge-dot {
+    background: #ef4444;
+}
+
+.tc-badge-info .tc-badge-dot {
+    background: #5b8cff;
 }
 
 
