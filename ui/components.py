@@ -490,6 +490,65 @@ def render_source_panel(
 
 
 
+def render_response_intelligence(
+    route: str,
+    confidence: str,
+    quality: str,
+    sources: int,
+    documents_enabled: bool,
+    web_enabled: bool,
+    reasoning: str,
+) -> None:
+
+    rows = [
+        ("Task", route),
+        ("Confidence", confidence),
+        ("Quality", quality),
+        ("Sources", str(sources)),
+        (
+            "Documents",
+            "Enabled"
+            if documents_enabled
+            else "Off",
+        ),
+        (
+            "Web Search",
+            "Enabled"
+            if web_enabled
+            else "Off",
+        ),
+        ("Reasoning", reasoning.title()),
+    ]
+
+    html = """
+    <div class="tc-result-card">
+
+        <div class="tc-card-title">
+            Response Intelligence
+        </div>
+
+        <div class="tc-result-body">
+    """
+
+    for label, value in rows:
+        html += f"""
+        <div class="tc-result-row">
+            <span>{escape(label)}</span>
+            <strong>{escape(value)}</strong>
+        </div>
+        """
+
+    html += """
+        </div>
+
+    </div>
+    """
+
+    render_html(html)
+
+
+
+
 def render_result_summary_card(
     route: str | None = None,
     confidence: str | None = None,

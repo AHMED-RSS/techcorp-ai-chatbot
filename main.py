@@ -119,6 +119,7 @@ from ui.components import (
     render_agent_timeline,
     render_card,
     render_result_summary_card,
+    render_response_intelligence,
     render_source_panel,
     render_activity_panel,
 )
@@ -2578,10 +2579,43 @@ if workspace == "chat":
                 ):
                     score_value = 0.0
 
-                render_result_summary_card(
+                render_response_intelligence(
                     route=route_name,
                     confidence=f"{confidence_value:.0%}",
                     quality=f"{score_value:.0%}",
+                    sources=(
+                        len(
+                            metadata.get(
+                                "document_sources",
+                                [],
+                            )
+                        )
+                        +
+                        len(
+                            metadata.get(
+                                "web_results",
+                                [],
+                            )
+                        )
+                    ),
+                    documents_enabled=bool(
+                        metadata.get(
+                            "document_sources",
+                            [],
+                        )
+                    ),
+                    web_enabled=bool(
+                        metadata.get(
+                            "web_results",
+                            [],
+                        )
+                    ),
+                    reasoning=str(
+                        metadata.get(
+                            "reasoning_mode",
+                            "normal",
+                        )
+                    ),
                 )
 
             render_source_panel(
