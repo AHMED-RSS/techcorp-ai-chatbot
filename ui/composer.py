@@ -61,9 +61,9 @@ SUPPORTED_FILE_TYPES = [
 
 
 REASONING_LABELS = {
-    "normal": "⚡ Normal",
-    "focused": "🎯 Focused",
-    "deep": "🧠 Deep Think",
+    "normal": "Normal",
+    "focused": "Focused",
+    "deep": "Deep Think",
 }
 
 
@@ -208,7 +208,7 @@ def process_composer_attachments(
             document_id = str(
                 document.get(
                     "id",
-                    "",
+                    "Search local documents",
                 )
             ).strip()
 
@@ -231,7 +231,7 @@ def process_composer_attachments(
                 str(
                     document.get(
                         "stored_path",
-                        "",
+                        "Search local documents",
                     )
                 ).strip()
                 or None
@@ -320,52 +320,52 @@ def _render_attachment_list() -> None:
             "error"
         )
 
-        if error:
-            st.error(
-                f"{name}: {error}"
-            )
-
-        else:
-            columns = st.columns(
-                [4, 1],
-                gap="small",
-            )
-
-            with columns[0]:
-                st.markdown(
-                    f"📎 **{name}**"
+        with st.container():
+            if error:
+                st.error(
+                    f"{name}: {error}"
                 )
 
-                st.caption(
-                    "Indexed chunks: "
-                    f"{attachment.get('indexed_chunks', 0)}"
+            else:
+                columns = st.columns(
+                    [5, 1],
+                    gap="small",
                 )
 
-            with columns[1]:
-                document_id = attachment.get(
-                    "document_id"
-                )
-
-                if st.button(
-                    "Remove",
-                    key=(
-                        "remove_composer_attachment_"
-                        f"{document_id or name}"
-                    ),
-                    use_container_width=True,
-                ):
-                    remaining = [
-                        item
-                        for item in attachments
-                        if item is not attachment
-                    ]
-
-                    st.session_state.pending_attachments = (
-                        remaining
+                with columns[0]:
+                    st.markdown(
+                        f"**{name}**"
                     )
 
-                    st.rerun()
+                    st.caption(
+                        "Indexed chunks: "
+                        f"{attachment.get('indexed_chunks', 0)}"
+                    )
 
+                with columns[1]:
+                    document_id = attachment.get(
+                        "document_id"
+                    )
+
+                    if st.button(
+                        "Remove",
+                        key=(
+                            "remove_composer_attachment_"
+                            f"{document_id or name}"
+                        ),
+                        use_container_width=True,
+                    ):
+                        remaining = [
+                            item
+                            for item in attachments
+                            if item is not attachment
+                        ]
+
+                        st.session_state.pending_attachments = (
+                            remaining
+                        )
+
+                        st.rerun()
 
 def _render_add_prompt_menu(
     *,
@@ -378,7 +378,7 @@ def _render_add_prompt_menu(
     """
 
     with st.popover(
-        "＋",
+        "+",
         disabled=disabled,
         use_container_width=False,
     ):
@@ -472,7 +472,7 @@ def _render_add_prompt_menu(
         )
 
         web_enabled = st.toggle(
-            "🌐 Search the web",
+            "Search the web",
             value=bool(
                 st.session_state.get(
                     "web_search_enabled",
@@ -492,7 +492,7 @@ def _render_add_prompt_menu(
         )
 
         document_enabled = st.toggle(
-            "📚 Search local documents",
+            "Search local documents",
             value=bool(
                 st.session_state.get(
                     "document_search_enabled",
@@ -545,6 +545,24 @@ def render_prompt_composer(
     with st.container(
         key="tc_prompt_composer"
     ):
+        attachments_count = len(
+            _pending_attachments()
+        )
+
+        reasoning_mode = str(
+            st.session_state.get(
+                "reasoning_mode",
+                "normal",
+            )
+        )
+
+        st.caption(
+            "Attachments: "
+            f"{attachments_count} | "
+            "Reasoning: "
+            f"{reasoning_mode.title()}"
+        )
+
         _render_add_prompt_menu(
             file_service=file_service,
             rag_service=rag_service,
