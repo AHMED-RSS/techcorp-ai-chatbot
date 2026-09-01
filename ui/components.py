@@ -305,9 +305,114 @@ def _split_response_sections(
 
 
 
+def render_response_summary(
+    summary: str,
+) -> None:
+    render_html(
+        f"""
+        <div class="tc-response-summary">
+            <div class="tc-response-summary-title">
+                Summary
+            </div>
+
+            <div class="tc-response-summary-text">
+                {escape(summary)}
+            </div>
+        </div>
+        """
+    )
+
+
+
+def inject_citations(
+    text: str,
+    web_sources: list[dict],
+    document_sources: list[dict],
+) -> str:
+
+    import re
+
+
+    def replace(match):
+
+        label = match.group(1)
+
+
+        if label.startswith("Web"):
+
+            try:
+                index = int(
+                    label.split()[1]
+                ) - 1
+
+                if index < len(web_sources):
+
+                    source = web_sources[index]
+
+                    url = str(
+                        source.get(
+                            "url",
+                            "",
+                        )
+                    )
+
+                    title = str(
+                        source.get(
+                            "title",
+                            label,
+                        )
+                    )
+
+                    if url:
+                        return (
+                            f'<a class="tc-citation-badge" '
+                            f'href="{escape(url)}" '
+                            'target="_blank" '
+                            'rel="noopener noreferrer">'
+                            f'🔗 Web {index + 1}'
+                            '</a>'
+                        )
+
+            except Exception:
+                pass
+
+
+        if label.startswith("Source"):
+
+            try:
+                index = int(
+                    label.split()[1]
+                ) - 1
+
+                if index < len(document_sources):
+
+                    return str(
+                        document_sources[index].get(
+                            "document_title",
+                            label,
+                        )
+                    )
+
+            except Exception:
+                pass
+
+
+        return label
+
+
+    return re.sub(
+        r"\[(Web \d+|Source \d+)\]",
+        replace,
+        text,
+    )
+
+
+
 def render_chat_message(
     role: str,
     content: str,
+    web_sources: list[dict] | None = None,
+    document_sources: list[dict] | None = None,
 ) -> None:
     safe_role = (
         "You"
@@ -322,6 +427,29 @@ def render_chat_message(
     )
 
     if role.lower() == "assistant":
+
+        summary = (
+            content
+            .strip()
+            .split("\n", 1)[0]
+            .strip()
+        )
+
+        if not summary:
+            summary = (
+                "Assistant generated a structured response."
+            )
+
+        if len(summary) > 220:
+            summary = (
+                summary[:220]
+                + "..."
+            )
+
+        render_response_summary(
+            summary
+        )
+
         sections = _split_response_sections(
             content
         )
@@ -341,6 +469,12 @@ def render_chat_message(
 
 
         for title, section_text in sections:
+
+            section_text = inject_citations(
+                section_text,
+                web_sources or [],
+                document_sources or [],
+            )
 
             st.markdown(
                 f"""
@@ -570,12 +704,33 @@ def render_source_panel(
                 )
             )
 
+            url = str(
+                source.get(
+                    "url",
+                    "",
+                )
+            )
+
+            link_html = (
+                f'<a href="{escape(url)}" '
+                'target="_blank">'
+                'Open source'
+                '</a>'
+                if url
+                else "Link unavailable"
+            )
+
             html += f"""
             <div class="tc-source-item">
                 <strong>{escape(title)}</strong>
+
                 <span>
-                    Verified web result
+                    {link_html}
                 </span>
+
+                <small>
+                    Verified web result
+                </small>
             </div>
             """
 

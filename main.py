@@ -2500,12 +2500,31 @@ if workspace == "chat":
             else "assistant"
         )
 
+        metadata = message.get(
+            "metadata",
+            {},
+        )
+
+        if not isinstance(
+            metadata,
+            dict,
+        ):
+            metadata = {}
+
         with st.chat_message(
             display_role
         ):
             render_chat_message(
                 role=display_role,
                 content=content,
+                web_sources=metadata.get(
+                    "web_results",
+                    [],
+                ),
+                document_sources=metadata.get(
+                    "document_sources",
+                    [],
+                ),
             )
 
             attachments = message.get(
@@ -2517,11 +2536,6 @@ if workspace == "chat":
                 st.caption(
                     f"[file] {len(attachments)} attachment(s)"
                 )
-
-            metadata = message.get(
-                "metadata",
-                {},
-            )
 
             if not isinstance(
                 metadata,

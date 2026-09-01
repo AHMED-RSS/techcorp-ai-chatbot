@@ -840,6 +840,46 @@ div[role="dialog"]:not(
    ========================================================== */
 
 
+
+.tc-response-summary {
+
+    margin-bottom: 1rem;
+
+    padding: 0.9rem;
+
+    border-radius: 0.85rem;
+
+    border: 1px solid var(--tc-border);
+
+    background:
+        linear-gradient(
+            180deg,
+            rgba(255,255,255,0.05),
+            rgba(255,255,255,0.02)
+        );
+
+}
+
+
+.tc-response-summary-title {
+
+    font-weight: 700;
+
+    margin-bottom: 0.4rem;
+
+}
+
+
+.tc-response-summary-text {
+
+    color: var(--tc-text-soft);
+
+    line-height: 1.5;
+
+}
+
+
+
 .tc-response-card {
 
     display: flex;
@@ -1426,6 +1466,34 @@ div[role="dialog"]:not(
     border-color:
         var(--tc-border-strong);
 }
+
+.tc-citation-badge {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    padding: 0.15rem 0.55rem;
+
+    margin-left: 0.25rem;
+
+    border-radius: 999px;
+
+    border: 1px solid var(--tc-border);
+
+    text-decoration: none;
+
+    font-size: 0.8rem;
+
+}
+
+
+.tc-citation-badge:hover {
+
+    opacity: 0.8;
+
+}
+
 
 </style>
 """
