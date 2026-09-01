@@ -14,8 +14,8 @@ from services.memory_service import (
 )
 from ui.components import (
     render_section_label,
+    render_context_memory,
 )
-
 
 MEMORY_ICONS = {
     "preference": "🎛️",
