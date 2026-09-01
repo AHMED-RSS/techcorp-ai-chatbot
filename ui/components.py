@@ -350,14 +350,16 @@ def render_response_actions(
 
     with columns[0]:
         if st.button(
-            "[S] Sources",
+            "\U0001F517 Sources",
             key=f"response_sources_{action_id}",
         ):
-            st.session_state.show_sources = True
+            st.session_state[
+                f"show_sources_{action_id}"
+            ] = True
 
     with columns[1]:
         if st.button(
-            "[M] Save Memory",
+            "\U0001F9E0 Save Memory",
             key=f"response_save_memory_{action_id}",
         ):
             st.session_state.memory_capture_content = content
@@ -365,7 +367,7 @@ def render_response_actions(
 
     with columns[2]:
         if st.button(
-            "[P] Create Plan",
+            "\U0001F4CB Create Plan",
             key=f"response_create_plan_{action_id}",
         ):
             st.session_state.plan_response_content = content
@@ -373,9 +375,10 @@ def render_response_actions(
 
     with columns[3]:
         if st.button(
-            "[+] Explain More",
+            "\U0001F4A1 Explain More",
             key=f"response_explain_more_{action_id}",
         ):
+            st.session_state.explain_response_content = content
             st.session_state.explain_response = True
 
 
@@ -538,7 +541,8 @@ def render_chat_message(
 {section_text}
 
 ---
-                """
+                """,
+                unsafe_allow_html=True,
             )
 
 
@@ -612,58 +616,57 @@ def render_agent_timeline(
     )
 
 
+
 def render_activity_panel(
     status: str,
 ) -> None:
 
-    labels = {
-        "preparing": (
-            "Preparing request",
-            "active",
-        ),
-        "searching_web": (
-            "Searching web",
-            "active",
-        ),
-        "routing": (
-            "Selecting route",
-            "active",
-        ),
-        "planning": (
-            "Creating plan",
-            "active",
-        ),
-        "executing": (
-            "Executing tools",
-            "active",
-        ),
-        "generating": (
-            "Generating response",
-            "active",
-        ),
-        "reviewing": (
-            "Quality review",
-            "active",
-        ),
-        "completed": (
-            "Completed",
-            "success",
-        ),
-        "failed": (
-            "Failed",
-            "error",
-        ),
-    }
+    steps = [
+        ("routing", "Routing"),
+        ("planning", "Planning"),
+        ("executing", "Execution"),
+        ("reviewing", "Quality review"),
+    ]
 
+    html_items = ""
 
-    title, state = labels.get(
-        status,
-        (
-            status.title(),
-            "info",
-        ),
+    completed = status == "completed"
+
+    for key, label in steps:
+
+        if completed:
+            icon_state = "success"
+            icon = "\u2713"
+
+        elif status == key:
+            icon_state = "active"
+            icon = "\u25CF"
+
+        else:
+            icon_state = "pending"
+            icon = "\u25CB"
+
+        html_items += f"""
+        <div class="tc-activity-item">
+            <span class="tc-activity-dot tc-{icon_state}">
+                {icon}
+            </span>
+
+            <span>
+                {escape(label)}
+            </span>
+        </div>
+        """
+
+    completion_message = (
+        """
+        <div class="tc-activity-complete">
+            Completed successfully
+        </div>
+        """
+        if completed
+        else ""
     )
-
 
     render_html(
         f"""
@@ -673,19 +676,13 @@ def render_activity_panel(
                 AI Activity
             </div>
 
-            <div class="tc-activity-item">
-                <span class="tc-activity-dot tc-{state}">
-                </span>
+            {completion_message}
 
-                <span>
-                    {escape(title)}
-                </span>
-            </div>
+            {html_items}
 
         </div>
         """
     )
-
 
 
 
@@ -811,7 +808,7 @@ def render_ai_workspace_dashboard(
     cards = [
         (
             "Agent",
-            f"{agent_status.title()} · {model_name}",
+            f"{agent_status.title()}\n{model_name} Ready",
         ),
         (
             "Reasoning",
@@ -819,7 +816,7 @@ def render_ai_workspace_dashboard(
         ),
         (
             "Knowledge",
-            f"{documents} Documents · {sources} Sources",
+            f"{documents} Documents\n{sources} Sources",
         ),
         (
             "Memory",
@@ -975,10 +972,12 @@ def render_response_intelligence(
     documents_enabled: bool,
     web_enabled: bool,
     reasoning: str,
+    status: str = "Completed",
 ) -> None:
 
     rows = [
         ("Task", route),
+        ("Status", status),
         ("Confidence", confidence),
         ("Quality", quality),
         ("Sources", str(sources)),
@@ -986,13 +985,13 @@ def render_response_intelligence(
             "Documents",
             "Enabled"
             if documents_enabled
-            else "Off",
+            else "Disabled",
         ),
         (
             "Web Search",
             "Enabled"
             if web_enabled
-            else "Off",
+            else "Disabled",
         ),
         ("Reasoning", reasoning.title()),
     ]

@@ -72,6 +72,14 @@ NAVIGATION_ITEMS: tuple[NavigationItem, ...] = (
             "task-state snapshots."
         ),
     ),
+    NavigationItem(
+        key="settings",
+        label="Settings",
+        icon="",
+        description=(
+            "Configure AI workspace settings."
+        ),
+    ),
 )
 
 
@@ -79,6 +87,14 @@ VALID_WORKSPACES = {
     item.key
     for item in NAVIGATION_ITEMS
 }
+
+
+NAVIGATION_GROUPS = (
+    ("WORKSPACE", {"chat", "study", "settings"}),
+    ("AGENT", {"skills", "tools"}),
+    ("OPERATIONS", {"plans", "executions", "reviews"}),
+    ("MEMORY", {"memory"}),
+ )
 
 
 def _current_workspace() -> str:
@@ -109,28 +125,38 @@ def render_workspace_navigation() -> str:
 
     current_workspace = _current_workspace()
 
-    for item in NAVIGATION_ITEMS:
-        is_active = (
-            current_workspace
-            == item.key
+    for group_name, group_keys in NAVIGATION_GROUPS:
+
+        st.markdown(
+            f"**{group_name}**"
         )
 
-        if st.button(
-            f"{item.icon}  {item.label}",
-            key=(
-                "navigation_button_"
-                f"{item.key}"
-            ),
-            help=item.description,
-            use_container_width=True,
-            type=(
-                "primary"
-                if is_active
-                else "secondary"
-            ),
-        ):
-            st.session_state.workspace = item.key
-            st.rerun()
+        for item in NAVIGATION_ITEMS:
+
+            if item.key not in group_keys:
+                continue
+
+            is_active = (
+                current_workspace
+                == item.key
+            )
+
+            if st.button(
+                f"{item.icon}  {item.label}",
+                key=(
+                    "navigation_button_"
+                    f"{item.key}"
+                ),
+                help=item.description,
+                use_container_width=True,
+                type=(
+                    "primary"
+                    if is_active
+                    else "secondary"
+                ),
+            ):
+                st.session_state.workspace = item.key
+                st.rerun()
 
     return _current_workspace()
 

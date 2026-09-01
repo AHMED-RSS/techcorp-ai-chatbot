@@ -1016,15 +1016,19 @@ def render_available_tool_card(
 
                 st.rerun()
 
-        with st.expander(
-            "Advanced schema",
-            expanded=False,
+        if st.session_state.get(
+            "developer_mode",
+            False,
         ):
-            st.json(
-                _tool_schema(
-                    tool
+            with st.expander(
+                "Advanced schema",
+                expanded=False,
+            ):
+                st.json(
+                    _tool_schema(
+                        tool
+                    )
                 )
-            )
 
 
 def render_manual_tool_runner(

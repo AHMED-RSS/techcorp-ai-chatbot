@@ -202,11 +202,12 @@ def render_plan_sidebar(
     planner_service: PlannerService,
 ) -> None:
     with st.sidebar:
-        render_section_label(
-            "Planning"
-        )
+        with st.expander(
+            "Planning",
+            expanded=True,
+        ):
 
-        st.toggle(
+            st.toggle(
             "Automatic planning",
             key="automatic_planning_enabled",
             help=(

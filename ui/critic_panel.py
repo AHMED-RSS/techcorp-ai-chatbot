@@ -201,11 +201,12 @@ def render_critic_sidebar(
     critic_service: CriticService,
 ) -> None:
     with st.sidebar:
-        render_section_label(
-            "Quality critic"
-        )
+        with st.expander(
+            "Quality critic",
+            expanded=False,
+        ):
 
-        st.toggle(
+            st.toggle(
             "Review answers automatically",
             key="automatic_critic_enabled",
             help=(

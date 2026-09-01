@@ -145,6 +145,28 @@ section[data-testid="stSidebar"] {
     border-right: 1px solid var(--tc-border) !important;
 }
 
+
+section[data-testid="stSidebar"] > div {
+    padding-top: 1rem;
+}
+
+
+section[data-testid="stSidebar"] .stButton > button {
+    min-height: 2.2rem;
+    border-radius: 0.65rem;
+    font-weight: 600;
+}
+
+
+section[data-testid="stSidebar"] .stMarkdown {
+    margin-bottom: 0.35rem;
+}
+
+
+section[data-testid="stSidebar"] [data-testid="stExpander"] {
+    margin-bottom: 0.6rem;
+}
+
 section[data-testid="stSidebar"] p,
 section[data-testid="stSidebar"] label,
 section[data-testid="stSidebar"] span {
@@ -893,9 +915,9 @@ div[role="dialog"]:not(
 
 .tc-response-section {
 
-    padding: 0.85rem;
+    padding: 1rem;
 
-    border-radius: 0.85rem;
+    border-radius: 0.9rem;
 
     border: 1px solid var(--tc-border);
 
@@ -938,8 +960,8 @@ div[role="dialog"]:not(
 
 .tc-message {
     width: 100%;
-    margin: 0.75rem 0;
-    padding: 1rem 1.15rem;
+    margin: 1rem 0;
+    padding: 1.15rem 1.25rem;
     border-radius: 1rem;
     border: 1px solid var(--tc-border);
     background: var(--tc-panel);
@@ -969,9 +991,9 @@ div[role="dialog"]:not(
     display:flex;
     align-items:center;
     gap:0.5rem;
-    margin-bottom:0.45rem;
+    margin-bottom:0.65rem;
 
-    font-size:0.82rem;
+    font-size:0.85rem;
     color:var(--tc-muted);
 }
 
@@ -1000,7 +1022,80 @@ div[role="dialog"]:not(
 }
 
 
+.tc-agent-panel {
+
+    margin-top: 0.8rem;
+
+    padding: 1rem;
+
+    border-radius: 1rem;
+
+    background:
+        linear-gradient(
+            180deg,
+            #181823 0%,
+            #11111a 100%
+        );
+
+    border: 1px solid var(--tc-border);
+
+}
+
+
+.tc-agent-row {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    gap: 0.75rem;
+
+    padding: 0.45rem 0;
+
+    border-bottom:
+        1px solid var(--tc-border);
+
+}
+
+
+.tc-agent-row:last-child {
+
+    border-bottom: none;
+
+}
+
+
+.tc-agent-label {
+
+    color: var(--tc-muted);
+
+    font-size: 0.82rem;
+
+}
+
+
+.tc-agent-value {
+
+    color: var(--tc-text);
+
+    font-weight: 600;
+
+    text-align: right;
+
+}
+
+
+.tc-agent-status {
+
+    margin-top: 0.85rem;
+
+}
+
+
 .tc-agent-step {
+
     display:flex;
     align-items:center;
     gap:0.65rem;
@@ -1204,6 +1299,19 @@ div[role="dialog"]:not(
         );
 
     border: 1px solid var(--tc-border);
+}
+
+
+.tc-activity-complete {
+    margin-bottom: 0.75rem;
+
+    font-size: 0.85rem;
+
+    font-weight: 600;
+
+    color: var(--tc-text);
+
+    opacity: 0.85;
 }
 
 
@@ -1424,6 +1532,8 @@ div[role="dialog"]:not(
 
     color: var(--tc-text);
 
+    white-space: pre-line;
+
 }
 
 
@@ -1519,6 +1629,128 @@ div[role="dialog"]:not(
 
 }
 
+    /* Response quick actions */
+
+    .tc-response-actions {
+        margin-top: 1rem;
+        margin-bottom: 0.5rem;
+        padding-top: 0.75rem;
+        border-top: 1px solid var(--tc-border);
+    }
+
+    .tc-response-actions span {
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        opacity: 0.65;
+    }
+
+    .tc-response-actions + div .stButton > button {
+        min-height: 2.2rem;
+        width: 100%;
+        font-size: 0.85rem;
+        font-weight: 600;
+        padding: 0.35rem 0.75rem;
+        border-radius: 10px;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .tc-response-actions + div .stButton > button:hover {
+        transform: translateY(-1px);
+    }
+
+    .tc-response-actions + div .stButton > button:focus {
+        outline: none;
+        box-shadow: none;
+    }
+
+/* ==========================================================
+   LOGIN EXPERIENCE
+   ========================================================== */
+
+.tc-login-page {
+    max-width: 950px;
+    margin: 3rem auto 2rem auto;
+}
+
+
+.tc-login-brand {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+
+.tc-login-brand h1 {
+    font-size: 4rem;
+    font-weight: 900;
+    letter-spacing: -0.05em;
+
+    background:
+        linear-gradient(
+            90deg,
+            #ff4b4b,
+            #a855f7
+        );
+
+    -webkit-background-clip: text;
+    color: transparent;
+}
+
+
+.tc-login-brand p {
+    color: var(--tc-text-soft);
+    font-size: 1.15rem;
+}
+
+
+.tc-feature-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(
+            3,
+            1fr
+        );
+
+    gap: 1rem;
+
+    margin-top: 2rem;
+}
+
+
+.tc-login-feature {
+
+    padding: 1.3rem;
+
+    min-height: 150px;
+
+    border-radius: 1rem;
+
+    background:
+        linear-gradient(
+            180deg,
+            rgba(255,255,255,0.08),
+            rgba(255,255,255,0.03)
+        );
+
+    border:
+        1px solid var(--tc-border);
+}
+
+
+.tc-login-feature h3 {
+    color: var(--tc-text);
+    margin-bottom: 0.7rem;
+}
+
+
+.tc-login-feature p {
+    color: var(--tc-text-soft);
+    line-height: 1.5;
+}
+
+
 
 
 </style>
@@ -1530,3 +1762,4 @@ def apply_app_styles() -> None:
         APP_CSS,
         unsafe_allow_html=True,
     )
+

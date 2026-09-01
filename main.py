@@ -163,6 +163,9 @@ from ui.skills_panel import (
 )
 from ui.study_panel import render_study_workspace
 from ui.styles import apply_app_styles
+from ui.settings_workspace import (
+    render_settings_workspace,
+)
 from ui.tool_panel import (
     render_tool_sidebar,
     render_tool_workspace,
@@ -2212,117 +2215,6 @@ render_file_sidebar(
     rag_service=rag_service,
 )
 
-render_memory_sidebar(
-    memory_service
-)
-
-render_tool_sidebar(
-    tool_service
-)
-
-render_plan_sidebar(
-    planner_service
-)
-
-render_execution_sidebar(
-    executor_service
-)
-
-render_critic_sidebar(
-    critic_service
-)
-
-
-with st.sidebar:
-    render_section_label(
-        "Agent routing"
-    )
-
-    st.toggle(
-        "Automatic routing",
-        key="automatic_routing_enabled",
-    )
-
-    st.toggle(
-        "Automatic safe tools",
-        key="automatic_tool_execution",
-    )
-
-    render_section_label(
-        "Skills"
-    )
-
-    render_skill_selector(
-        skill_service
-    )
-
-    render_section_label(
-        "Local models"
-    )
-
-    installed_models = (
-        st.session_state.ollama_models
-    )
-
-    if installed_models:
-        selected = (
-            st.session_state.selected_chat_model
-        )
-
-        if selected not in installed_models:
-            selected = (
-                settings.ollama_chat_model
-                if settings.ollama_chat_model
-                in installed_models
-                else installed_models[0]
-            )
-
-        widget_model = (
-            st.session_state.get(
-                "local_model_selectbox"
-            )
-        )
-
-        if widget_model not in installed_models:
-            st.session_state[
-                "local_model_selectbox"
-            ] = selected
-
-        st.selectbox(
-            "Chat model",
-            options=installed_models,
-            key="local_model_selectbox",
-            on_change=(
-                persist_selected_chat_model
-            ),
-        )
-
-        st.session_state.selected_chat_model = (
-            st.session_state[
-                "local_model_selectbox"
-            ]
-        )
-
-    else:
-        st.caption(
-            f"Configured model: "
-            f"{settings.ollama_chat_model}"
-        )
-
-    st.caption(
-        f"Embedding model: "
-        f"{settings.ollama_embed_model}"
-    )
-
-    if st.button(
-        "> Refresh local status",
-        use_container_width=True,
-        key="refresh_local_status",
-    ):
-        refresh_ollama_status()
-        st.rerun()
-
-
 render_sidebar_status(
     settings
 )
@@ -2344,6 +2236,20 @@ def handle_response_save_memory(
     )
 
 
+
+def handle_response_explain(
+    content: str,
+) -> None:
+    st.session_state.pending_explain_prompt = (
+        "Please explain the previous answer in more detail.\n\n"
+        + content
+    )
+
+    st.toast(
+        "Generating deeper explanation"
+    )
+
+
 def handle_response_plan(
     content: str,
 ) -> None:
@@ -2358,10 +2264,10 @@ def handle_response_plan(
         route_data,
         dict,
     ):
-        st.warning(
-            "No route information available."
-        )
-        return
+        route_data = {
+            "route": "general",
+            "confidence": 1.0,
+        }
 
     route = RouteDecision(
         route=route_data.get(
@@ -2408,6 +2314,7 @@ if st.session_state.get(
     )
 
     st.session_state.memory_capture_requested = False
+    st.session_state.memory_capture_content = ""
 
 
 if st.session_state.get(
@@ -2421,6 +2328,21 @@ if st.session_state.get(
     )
 
     st.session_state.plan_from_response = False
+    st.session_state.plan_response_content = ""
+
+
+if st.session_state.get(
+    "explain_response"
+):
+    handle_response_explain(
+        st.session_state.get(
+            "explain_response_content",
+            "",
+        )
+    )
+
+    st.session_state.explain_response = False
+    st.session_state.explain_response_content = ""
 
 
 render_current_workspace(
@@ -2456,10 +2378,19 @@ if workspace == "chat":
                 [],
             )
         ),
-        sources=len(
-            st.session_state.get(
-                "last_web_results",
-                [],
+        sources=(
+            len(
+                st.session_state.get(
+                    "last_web_results",
+                    [],
+                )
+            )
+            +
+            len(
+                st.session_state.get(
+                    "last_document_sources",
+                    [],
+                )
             )
         ),
         memories=len(
@@ -2769,6 +2700,7 @@ if workspace == "chat":
                             [],
                         )
                     ),
+                    status="Completed",
                     reasoning=str(
                         metadata.get(
                             "reasoning_mode",
@@ -2777,16 +2709,22 @@ if workspace == "chat":
                     ),
                 )
 
-            render_source_panel(
-                metadata.get(
-                    "document_sources",
-                    [],
-                ),
-                metadata.get(
-                    "web_results",
-                    [],
-                ),
-            )
+            source_action_id = id(metadata)
+
+            if st.session_state.get(
+                f"show_sources_{source_action_id}",
+                False,
+            ):
+                render_source_panel(
+                    metadata.get(
+                        "document_sources",
+                        [],
+                    ),
+                    metadata.get(
+                        "web_results",
+                        [],
+                    ),
+                )
 
     if not st.session_state.ollama_connected:
         st.warning(
@@ -2794,18 +2732,33 @@ if workspace == "chat":
             "before sending an AI request."
         )
 
-    if st.session_state.agent_running:
+    if (
+        st.session_state.agent_running
+        or st.session_state.agent_status
+        in {
+            "completed",
+            "failed",
+        }
+    ):
         render_activity_panel(
-            st.session_state.agent_status
+            (
+                "completed"
+                if (
+                    not st.session_state.agent_running
+                    and st.session_state.agent_status == "completed"
+                )
+                else st.session_state.agent_status
+            )
         )
 
-        if st.button(
-            "Stop execution",
-            type="primary",
-            use_container_width=True,
-            key="stop_execution_button",
-        ):
-            request_agent_stop()
+        if st.session_state.agent_running:
+            if st.button(
+                "Stop execution",
+                type="primary",
+                use_container_width=True,
+                key="stop_execution_button",
+            ):
+                request_agent_stop()
 
     submission = render_prompt_composer(
         file_service=file_service,
@@ -2815,8 +2768,73 @@ if workspace == "chat":
         ),
     )
 
+    if (
+        submission is None
+        and st.session_state.get(
+            "pending_explain_prompt"
+        )
+        and not st.session_state.get(
+            "explain_consumed",
+            False,
+        )
+    ):
+        explain_prompt = st.session_state.pop(
+            "pending_explain_prompt"
+        )
+
+        class ExplainSubmission:
+            prompt = explain_prompt
+
+            display_prompt = (
+                "Please explain the previous answer in more detail."
+            )
+
+            is_explain_request = True
+
+            reasoning_mode = (
+                st.session_state.get(
+                    "reasoning_mode",
+                    "normal",
+                )
+            )
+
+            web_search_enabled = (
+                st.session_state.get(
+                    "web_search_enabled",
+                    False,
+                )
+            )
+
+            document_search_enabled = (
+                st.session_state.get(
+                    "document_search_enabled",
+                    False,
+                )
+            )
+
+            attachments = []
+
+            def to_dict(self):
+                return {
+                    "prompt": self.prompt,
+                    "reasoning_mode": self.reasoning_mode,
+                    "web_search_enabled": self.web_search_enabled,
+                    "document_search_enabled": self.document_search_enabled,
+                    "attachments": [],
+                }
+
+        submission = ExplainSubmission()
+
+        st.session_state.explain_consumed = True
+
     if submission is not None:
         prompt = submission.prompt
+
+        display_prompt = getattr(
+            submission,
+            "display_prompt",
+            prompt,
+        )
 
         st.session_state.last_composer_submission = (
             submission.to_dict()
@@ -2843,14 +2861,21 @@ if workspace == "chat":
             )
         ]
 
-        append_message(
-            "user",
-            prompt,
-            metadata={
-                "composer": submission.to_dict()
-            },
-            attachments=attachment_metadata,
-        )
+        st.session_state.explain_submission_created = False
+
+        if not getattr(
+            submission,
+            "is_explain_request",
+            False,
+        ):
+            append_message(
+                "user",
+                display_prompt,
+                metadata={
+                    "composer": submission.to_dict()
+                },
+                attachments=attachment_metadata,
+            )
 
         if is_source_follow_up(
             prompt
@@ -3494,6 +3519,10 @@ if workspace == "chat":
 
                 st.session_state.agent_status = "failed"
 
+                st.toast(
+                    error_message
+                )
+
             finally:
                 st.session_state.agent_running = False
                 st.session_state.execution_in_progress = False
@@ -3555,7 +3584,11 @@ elif workspace == "memory":
     )
 
 
-if settings.app_debug:
+elif workspace == "settings":
+    render_settings_workspace()
+
+
+if False and settings.app_debug:
     with st.expander(
         "Development information",
         expanded=False,

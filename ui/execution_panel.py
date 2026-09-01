@@ -206,11 +206,12 @@ def render_execution_sidebar(
     executor_service: ExecutorService,
 ) -> None:
     with st.sidebar:
-        render_section_label(
-            "Execution"
-        )
+        with st.expander(
+            "Execution",
+            expanded=False,
+        ):
 
-        st.toggle(
+            st.toggle(
             "Execute plans automatically",
             key="automatic_plan_execution",
             help=(

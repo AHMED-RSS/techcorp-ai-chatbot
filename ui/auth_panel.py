@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 import streamlit as st
 
@@ -11,42 +11,74 @@ from services.user_data_service import (
     UserDataService,
 )
 
+from ui.components import (
+    render_section_label,
+    render_html,
+)
+
 
 def render_login_screen() -> None:
     """Render the protected application entry screen."""
 
-    st.title("TechCorp AI")
+    st.title(
+        "TechCorp AI"
+    )
+
     st.subheader(
         "Secure, local-first AI workspace"
     )
 
-    st.write(
-        "Sign in to access your chats, documents, "
-        "memories and AI tools."
+    st.caption(
+        "Private agents, documents, memory and automation."
     )
 
-    with st.container(border=True):
+    st.divider()
+
+    left, right = st.columns(
+        [1, 1]
+    )
+
+    with left:
         st.markdown(
-            "### Sign in or create an account"
+            "### AI Workspace"
         )
 
         st.write(
-            "Auth0 manages Google login, "
-            "email/password accounts, account "
-            "verification and password recovery."
+            """
+            Build intelligent workflows.
+
+            - AI Agents
+
+            - Document Intelligence
+
+            - Local Ollama Models
+
+            - Persistent Memory
+            """
         )
 
-        if st.button(
-            "Continue with Auth0",
-            type="primary",
-            use_container_width=True,
-            key="auth0_login_button",
-        ):
-            st.login("auth0")
+    with right:
+        with st.container(border=True):
 
-    st.caption(
-        "Your Ollama models continue to run locally."
-    )
+            st.markdown(
+                "## Welcome back"
+            )
+
+            st.caption(
+                "Access your TechCorp AI workspace."
+            )
+
+            if st.button(
+                "Continue with Auth0",
+                type="primary",
+                use_container_width=True,
+                key="auth0_login_button",
+            ):
+                st.login("auth0")
+
+            st.caption(
+                "Secure authentication ? Local-first AI"
+            )
 
 
 def require_authenticated_user(
@@ -111,7 +143,9 @@ def render_user_account(
     """Render the authenticated account controls."""
 
     with st.sidebar:
-        st.markdown("### Account")
+        render_section_label(
+            "Account"
+        )
 
         avatar_column, details_column = (
             st.columns([1, 4])
@@ -125,7 +159,7 @@ def render_user_account(
                 )
 
             else:
-                st.markdown("## 👤")
+                st.markdown("## ðŸ‘¤")
 
         with details_column:
             st.markdown(
