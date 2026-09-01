@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 import streamlit as st
 
@@ -772,6 +772,137 @@ div[role="dialog"]:not(
         padding: 1.2rem;
     }
 }
+
+/* ==========================================================
+   CHAT EXPERIENCE
+   ========================================================== */
+
+.tc-message {
+    width: 100%;
+    margin: 0.75rem 0;
+    padding: 1rem 1.15rem;
+    border-radius: 1rem;
+    border: 1px solid var(--tc-border);
+    background: var(--tc-panel);
+    color: var(--tc-text);
+    line-height: 1.65;
+}
+
+.tc-message-user {
+    background:
+        linear-gradient(
+            135deg,
+            rgba(255,79,104,0.18),
+            rgba(168,85,247,0.18)
+        );
+
+    border-color:
+        rgba(168,85,247,0.35);
+}
+
+.tc-message-assistant {
+    background:
+        rgba(255,255,255,0.04);
+}
+
+
+.tc-message-header {
+    display:flex;
+    align-items:center;
+    gap:0.5rem;
+    margin-bottom:0.45rem;
+
+    font-size:0.82rem;
+    color:var(--tc-muted);
+}
+
+
+.tc-message-body {
+    color:var(--tc-text);
+}
+
+
+/* ==========================================================
+   AGENT STATUS
+   ========================================================== */
+
+.tc-agent-status-card {
+    padding:1rem;
+    border-radius:1rem;
+
+    background:
+        linear-gradient(
+            180deg,
+            rgba(255,255,255,0.06),
+            rgba(255,255,255,0.02)
+        );
+
+    border:1px solid var(--tc-border);
+}
+
+
+.tc-agent-step {
+    display:flex;
+    align-items:center;
+    gap:0.65rem;
+
+    padding:0.55rem 0;
+
+    color:var(--tc-text-soft);
+}
+
+
+.tc-agent-step-dot {
+    width:0.7rem;
+    height:0.7rem;
+
+    border-radius:50%;
+
+    background:
+        var(--tc-accent-b);
+}
+
+
+.tc-agent-step-active
+.tc-agent-step-dot {
+    background:
+        var(--tc-accent-a);
+
+    box-shadow:
+        0 0 12px
+        rgba(255,79,104,0.7);
+}
+
+
+/* ==========================================================
+   CARDS
+   ========================================================== */
+
+.tc-card {
+    padding:1rem;
+
+    border-radius:1rem;
+
+    background:
+        var(--tc-panel);
+
+    border:
+        1px solid var(--tc-border);
+
+    transition:
+        transform .2s ease,
+        border-color .2s ease;
+}
+
+
+.tc-card:hover {
+    transform:
+        translateY(-2px);
+
+    border-color:
+        var(--tc-border-strong);
+}
+
 </style>
 """
 

@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 import base64
 import json
@@ -113,7 +113,12 @@ from ui.chat_sidebar import (
     render_conversation_sidebar,
 )
 from ui.composer import render_prompt_composer
-from ui.components import render_section_label
+from ui.components import (
+    render_section_label,
+    render_chat_message,
+    render_agent_timeline,
+    render_card,
+)
 from ui.critic_panel import (
     render_critic_report,
     render_critic_sidebar,
@@ -159,7 +164,7 @@ from ui.tool_panel import (
 
 st.set_page_config(
     page_title="TechCorp AI",
-    page_icon="â—‰",
+    page_icon="Ã¢â€”â€°",
     layout="wide",
     initial_sidebar_state="expanded",
 )
@@ -916,7 +921,7 @@ def render_document_sources(
             )
 
             st.caption(
-                f"{source.get('original_name', '')} Â· "
+                f"{source.get('original_name', '')} Ã‚Â· "
                 + (
                     f"Relevance {float(score):.0%}"
                     if score is not None
@@ -934,7 +939,7 @@ def render_document_sources(
             st.write(
                 text[:900]
                 + (
-                    "â€¦"
+                    "Ã¢â‚¬Â¦"
                     if len(text) > 900
                     else ""
                 )
@@ -2302,7 +2307,7 @@ with st.sidebar:
     )
 
     if st.button(
-        "â†» Refresh local status",
+        "Ã¢â€ Â» Refresh local status",
         use_container_width=True,
         key="refresh_local_status",
     ):
@@ -2361,6 +2366,41 @@ if workspace == "chat":
             expanded=False,
         )
 
+    if st.session_state.agent_status:
+        timeline_steps = [
+            {
+                "title": "Routing",
+                "status": (
+                    "active"
+                    if st.session_state.agent_status == "routing"
+                    else "done"
+                ),
+            },
+            {
+                "title": "Planning",
+                "status": (
+                    "active"
+                    if st.session_state.agent_status == "planning"
+                    else "pending"
+                ),
+            },
+            {
+                "title": (
+                    st.session_state.current_step_title
+                    or "Execution"
+                ),
+                "status": (
+                    "active"
+                    if st.session_state.agent_status == "executing"
+                    else "pending"
+                ),
+            },
+        ]
+
+        render_agent_timeline(
+            timeline_steps
+        )
+
     if isinstance(
         st.session_state.current_execution,
         dict,
@@ -2414,8 +2454,9 @@ if workspace == "chat":
         with st.chat_message(
             display_role
         ):
-            st.markdown(
-                content
+            render_chat_message(
+                role=display_role,
+                content=content,
             )
 
             attachments = message.get(
@@ -2425,7 +2466,7 @@ if workspace == "chat":
 
             if attachments:
                 st.caption(
-                    f"ðŸ“Ž {len(attachments)} attachment(s)"
+                    f"Ã°Å¸â€œÅ½ {len(attachments)} attachment(s)"
                 )
 
             metadata = message.get(
@@ -2472,7 +2513,7 @@ if workspace == "chat":
 
                 st.caption(
                     "Composer: "
-                    + " Â· ".join(
+                    + " Ã‚Â· ".join(
                         labels
                     )
                 )
@@ -2503,7 +2544,7 @@ if workspace == "chat":
 
                 st.caption(
                     "Route: "
-                    f"{route_data.get('route', 'general').title()} Â· "
+                    f"{route_data.get('route', 'general').title()} Ã‚Â· "
                     f"{confidence_value:.0%}"
                 )
 
@@ -3376,3 +3417,7 @@ if settings.app_debug:
                 ),
             }
         )
+
+
+
+

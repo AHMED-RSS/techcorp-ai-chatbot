@@ -47,7 +47,7 @@ def render_brand(
     render_html(
         f"""
         <div class="tc-brand">
-            <div class="tc-brand-logo">◉</div>
+            <div class="tc-brand-logo">&#9673;</div>
             <div class="tc-brand-copy">
                 <div class="tc-brand-title">{escape(name)}</div>
                 <div class="tc-brand-subtitle">{escape(subtitle)}</div>
@@ -163,7 +163,7 @@ def render_empty_chat() -> None:
     render_html(
         """
         <div class="tc-empty-state">
-            <div class="tc-empty-icon">✦</div>
+            <div class="tc-empty-icon">&#10022;</div>
             <h2 class="tc-empty-title">
                 What would you like to accomplish?
             </h2>
@@ -173,7 +173,8 @@ def render_empty_chat() -> None:
             </div>
             <div class="tc-feature-grid">
                 <div class="tc-feature-card">
-                    <div class="tc-feature-icon">🧠</div>
+
+
                     <div class="tc-feature-title">Deep reasoning</div>
                     <div class="tc-feature-text">
                         Break complex goals into structured,
@@ -181,7 +182,8 @@ def render_empty_chat() -> None:
                     </div>
                 </div>
                 <div class="tc-feature-card">
-                    <div class="tc-feature-icon">📚</div>
+
+
                     <div class="tc-feature-title">
                         Document intelligence
                     </div>
@@ -191,7 +193,8 @@ def render_empty_chat() -> None:
                     </div>
                 </div>
                 <div class="tc-feature-card">
-                    <div class="tc-feature-icon">✨</div>
+
+
                     <div class="tc-feature-title">Reusable skills</div>
                     <div class="tc-feature-text">
                         Apply specialised instructions for study,
@@ -207,7 +210,7 @@ def render_empty_chat() -> None:
 def render_information_card(
     title: str,
     description: str,
-    icon: str = "•",
+    icon: str = "&#8226;",
 ) -> None:
     render_html(
         f"""
@@ -218,6 +221,91 @@ def render_information_card(
             </div>
             <div class="tc-card-description">
                 {escape(description)}
+            </div>
+        </div>
+        """
+    )
+
+def render_chat_message(
+    role: str,
+    content: str,
+) -> None:
+    safe_role = (
+        "You"
+        if role.lower() == "user"
+        else "Assistant"
+    )
+
+    role_class = (
+        "tc-message-user"
+        if role.lower() == "user"
+        else "tc-message-assistant"
+    )
+
+    render_html(
+        f"""
+        <div class="tc-message {role_class}">
+            <div class="tc-message-header">
+                {escape(safe_role)}
+            </div>
+            <div class="tc-message-body">
+                {escape(content)}
+            </div>
+        </div>
+        """
+    )
+
+
+def render_agent_timeline(
+    steps: list[dict[str, str]],
+) -> None:
+    items = ""
+
+    for step in steps:
+        status = step.get(
+            "status",
+            "pending",
+        )
+
+        title = step.get(
+            "title",
+            "Step",
+        )
+
+        active = (
+            "tc-agent-step-active"
+            if status == "active"
+            else ""
+        )
+
+        items += f"""
+        <div class="tc-agent-step {active}">
+            <span class="tc-agent-step-dot"></span>
+            <span>{escape(title)}</span>
+        </div>
+        """
+
+    render_html(
+        f"""
+        <div class="tc-agent-status-card">
+            {items}
+        </div>
+        """
+    )
+
+
+def render_card(
+    title: str,
+    body: str,
+) -> None:
+    render_html(
+        f"""
+        <div class="tc-card">
+            <div class="tc-card-title">
+                {escape(title)}
+            </div>
+            <div class="tc-card-description">
+                {escape(body)}
             </div>
         </div>
         """
