@@ -490,6 +490,53 @@ def render_source_panel(
 
 
 
+def render_learning_workspace(
+    title: str,
+    study_type: str,
+    documents: int,
+    sources: int,
+    flashcards: int,
+    questions: int,
+) -> None:
+
+    rows = [
+        ("Goal", title),
+        ("Mode", study_type.title()),
+        ("Documents", str(documents)),
+        ("Sources", str(sources)),
+        ("Flashcards", str(flashcards)),
+        ("Quiz Questions", str(questions)),
+    ]
+
+    html = """
+    <div class="tc-learning-card">
+
+        <div class="tc-card-title">
+            Learning Workspace
+        </div>
+
+        <div class="tc-learning-body">
+    """
+
+    for label, value in rows:
+        html += f"""
+        <div class="tc-learning-row">
+            <span>{escape(label)}</span>
+            <strong>{escape(value)}</strong>
+        </div>
+        """
+
+    html += """
+        </div>
+
+    </div>
+    """
+
+    render_html(html)
+
+
+
+
 def render_response_intelligence(
     route: str,
     confidence: str,

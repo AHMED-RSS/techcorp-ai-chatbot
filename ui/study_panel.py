@@ -5,6 +5,10 @@ import re
 
 import streamlit as st
 
+from ui.components import (
+    render_learning_workspace,
+)
+
 from agents.study import StudySession
 from core.exceptions import StudyError
 from services.file_service import FileService
@@ -525,6 +529,23 @@ def render_study_session(
         f"{session.study_type.title()} · "
         f"{len(session.document_titles)} document(s) · "
         f"{session.created_at}"
+    )
+
+    render_learning_workspace(
+        title=session.title,
+        study_type=session.study_type,
+        documents=len(
+            session.document_titles
+        ),
+        sources=len(
+            session.sources
+        ),
+        flashcards=len(
+            session.flashcards
+        ),
+        questions=len(
+            session.quiz_questions
+        ),
     )
 
     if session.document_titles:
