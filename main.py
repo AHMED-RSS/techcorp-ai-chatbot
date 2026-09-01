@@ -123,6 +123,7 @@ from ui.components import (
     render_source_panel,
     render_activity_panel,
     render_ai_workspace_dashboard,
+    render_response_actions,
 )
 
 from ui.critic_panel import (
@@ -2326,7 +2327,101 @@ render_sidebar_status(
     settings
 )
 
+def handle_response_save_memory(
+    content: str,
+) -> None:
+    memory_service.create_memory(
+        content=content,
+        kind="note",
+        source="response_action",
+        chat_id=(
+            st.session_state.current_chat_id
+        ),
+    )
+
+    st.toast(
+        "Response saved to memory"
+    )
+
+
+def handle_response_plan(
+    content: str,
+) -> None:
+    route_data = (
+        st.session_state
+        .get(
+            "last_route_decision"
+        )
+    )
+
+    if not isinstance(
+        route_data,
+        dict,
+    ):
+        st.warning(
+            "No route information available."
+        )
+        return
+
+    route = RouteDecision(
+        route=route_data.get(
+            "route",
+            "general",
+        ),
+        confidence=route_data.get(
+            "confidence",
+            1.0,
+        ),
+        reason=route_data.get(
+            "reason",
+            "Created from response action.",
+        ),
+    )
+
+    plan = create_plan(
+        prompt=content,
+        route=route,
+        deep_think=True,
+    )
+
+    st.session_state.current_plan = (
+        plan.to_dict()
+    )
+
+    st.toast(
+        "Plan created"
+    )
+
+
+
 render_sidebar_footer()
+
+
+if st.session_state.get(
+    "memory_capture_requested"
+):
+    handle_response_save_memory(
+        st.session_state.get(
+            "memory_capture_content",
+            "",
+        )
+    )
+
+    st.session_state.memory_capture_requested = False
+
+
+if st.session_state.get(
+    "plan_from_response"
+):
+    handle_response_plan(
+        st.session_state.get(
+            "plan_response_content",
+            "",
+        )
+    )
+
+    st.session_state.plan_from_response = False
+
 
 render_current_workspace(
     workspace=workspace,
@@ -2526,6 +2621,12 @@ if workspace == "chat":
                     [],
                 ),
             )
+
+            if display_role == "assistant":
+                render_response_actions(
+                    metadata,
+                    content,
+   	        )
 
             attachments = message.get(
                 "attachments",

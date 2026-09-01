@@ -1495,6 +1495,32 @@ div[role="dialog"]:not(
 }
 
 
+
+.tc-response-actions {
+
+    margin-top: 0.8rem;
+
+    padding: 0.6rem;
+
+    border-top: 1px solid var(--tc-border);
+
+}
+
+
+.tc-response-actions span {
+
+    font-size: 0.75rem;
+
+    opacity: 0.7;
+
+    text-transform: uppercase;
+
+    letter-spacing: 0.08em;
+
+}
+
+
+
 </style>
 """
 

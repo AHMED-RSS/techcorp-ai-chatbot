@@ -324,6 +324,61 @@ def render_response_summary(
 
 
 
+def render_response_actions(
+    metadata: dict,
+    content: str = "",
+) -> None:
+
+    sources = True
+
+    html = """
+    <div class="tc-response-actions">
+        <span>Quick actions</span>
+    </div>
+    """
+
+    render_html(
+        html
+    )
+
+    columns = st.columns(
+        4,
+        gap="small",
+    )
+
+    action_id = id(metadata)
+
+    with columns[0]:
+        if st.button(
+            "[S] Sources",
+            key=f"response_sources_{action_id}",
+        ):
+            st.session_state.show_sources = True
+
+    with columns[1]:
+        if st.button(
+            "[M] Save Memory",
+            key=f"response_save_memory_{action_id}",
+        ):
+            st.session_state.memory_capture_content = content
+            st.session_state.memory_capture_requested = True
+
+    with columns[2]:
+        if st.button(
+            "[P] Create Plan",
+            key=f"response_create_plan_{action_id}",
+        ):
+            st.session_state.plan_response_content = content
+            st.session_state.plan_from_response = True
+
+    with columns[3]:
+        if st.button(
+            "[+] Explain More",
+            key=f"response_explain_more_{action_id}",
+        ):
+            st.session_state.explain_response = True
+
+
 def inject_citations(
     text: str,
     web_sources: list[dict],
