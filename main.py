@@ -55,6 +55,7 @@ from core.session import (
     request_agent_stop,
     reset_agent_state,
 )
+from services.chatbot_service import ChatbotService
 from services.chat_service import ChatService
 from services.database_chat_service import (
     DatabaseChatService,
@@ -158,7 +159,7 @@ from ui.tool_panel import (
 
 st.set_page_config(
     page_title="TechCorp AI",
-    page_icon="◉",
+    page_icon="â—‰",
     layout="wide",
     initial_sidebar_state="expanded",
 )
@@ -181,6 +182,7 @@ tool_service: ToolService = app.tools
 router_service: RouterService = app.router
 planner_service: PlannerService = app.planner
 executor_service: ExecutorService = app.executor
+chatbot_service: ChatbotService = app.chatbot
 critic_service: CriticService = app.critic
 memory_service: MemoryService = app.memory
 study_service: StudyService = app.study
@@ -914,7 +916,7 @@ def render_document_sources(
             )
 
             st.caption(
-                f"{source.get('original_name', '')} · "
+                f"{source.get('original_name', '')} Â· "
                 + (
                     f"Relevance {float(score):.0%}"
                     if score is not None
@@ -932,7 +934,7 @@ def render_document_sources(
             st.write(
                 text[:900]
                 + (
-                    "…"
+                    "â€¦"
                     if len(text) > 900
                     else ""
                 )
@@ -2300,7 +2302,7 @@ with st.sidebar:
     )
 
     if st.button(
-        "↻ Refresh local status",
+        "â†» Refresh local status",
         use_container_width=True,
         key="refresh_local_status",
     ):
@@ -2423,7 +2425,7 @@ if workspace == "chat":
 
             if attachments:
                 st.caption(
-                    f"📎 {len(attachments)} attachment(s)"
+                    f"ðŸ“Ž {len(attachments)} attachment(s)"
                 )
 
             metadata = message.get(
@@ -2470,7 +2472,7 @@ if workspace == "chat":
 
                 st.caption(
                     "Composer: "
-                    + " · ".join(
+                    + " Â· ".join(
                         labels
                     )
                 )
@@ -2501,7 +2503,7 @@ if workspace == "chat":
 
                 st.caption(
                     "Route: "
-                    f"{route_data.get('route', 'general').title()} · "
+                    f"{route_data.get('route', 'general').title()} Â· "
                     f"{confidence_value:.0%}"
                 )
 
@@ -3038,10 +3040,20 @@ if workspace == "chat":
                         "executing"
                     )
 
-                    execution = execute_plan(
-                        plan,
-                        web_context=web_context,
+                    chatbot_result = chatbot_service.process_message(
+                        message=prompt,
+                        model=st.session_state.selected_chat_model,
+                        document_ids=list(
+                            st.session_state.active_document_ids
+                        ),
+                        conversation_messages=model_messages(),
+                        progress_callback=execution_callback,
+                        stop_callback=is_stop_requested,
+                        route=route,
+                        plan=plan,
                     )
+
+                    execution = chatbot_result.execution
 
                     original_output = (
                         execution.final_output
